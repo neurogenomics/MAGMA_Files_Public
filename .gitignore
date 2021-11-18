@@ -1,3 +1,6 @@
+# Large files
+data/GWAS_sumstats
+
 # History files
 .Rhistory
 .Rapp.history
