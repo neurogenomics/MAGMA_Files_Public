@@ -50,9 +50,41 @@ dir.create(save_dir, showWarnings = FALSE, recursive = TRUE)
 
 ## Find sum stats
 
+#### Neurodegeneration traits
+
+First, we will search for GWAS of several neurodegenerative disease traits.
+
 ```{r} 
-metagwas <- MungeSumstats::find_sumstats(traits = c("Alzheimer","Parkinson",
-                                                    "amyotrophic","dementia"))
+traits1 <- c("Alzheimer","Parkinson","amyotrophic","frontotemporal dementia","dementia")
+metagwas1 <- MungeSumstats::find_sumstats(traits = traits1)
+```
+
+#### BMI traits
+
+Next, we perform a second search for Body Mass Index (BMI)-related traits.
+We are querying these separately because we want to apply some additional filtering such that we only include GWAS with the greatest sample sizes from the UK Biobank, as well as exclude GWAS of "weight *loss*" or "weight *change*". 
+
+```{r}
+traits2 <- c("body mass index","standing height","weight")
+metagwas2 <- MungeSumstats::find_sumstats(traits = traits)
+metagwas2 <- filter_traits(meta = metagwas2, 
+                            traits = traits, 
+                            consortia = c("Neale Lab","UK Biobank"),
+                            exclusion_terms = c("loss","change"),
+                            startswith_only = TRUE,
+                            topn = 1) 
+```
+
+
+Finally, we can merge the metadata from our two GWAS searches.
+We use th `assign_trait_groups` functions to automatically assign mutually-exclusive groups to each of the traits based on our search terms. 
+**NOTE**: You may want to double check the "trait_group" assignments, as these may not always be what you had in mind; e.g. "frontotemporal dementia (FTD)" might get assigned to the generic "dementia" group instead of the more appropriate "frontotemporal dementia" group simply due to the order in which groups were assigned.
+
+```{r}
+metagwas <- rbind(metagwas1,metagwas2, fill=TRUE)
+traits <- c(traits1,traits2)
+meta <- assign_trait_groups(meta = metagwas, 
+                            traits = traits)
 knitr::kable(metagwas)
 ```
 
@@ -67,24 +99,36 @@ So we instead parellelise this step ourselves,
 saving each summary stats file in it's own folder with a 
 subdirectory for its respective log files.
 
+
+First, let's remove incomplete files. 
+
 ```{r}
-gwas_paths <- parallel::mclapply(metagwas$id, function(id){
+munged_files <- list_sumstats(save_dir = save_dir)
+bad_files <- munged_files[file.info(munged_files)$size <100]
+file.remove(bad_files)
+```
+
+
+```{r}
+gwas_paths <- parallel::mclapply("ukb-b-14043", function(id){
   id_dir <- file.path(save_dir,id)
   dir.create(id_dir, showWarnings = FALSE, recursive = TRUE)
   log_dir <- file.path(id_dir,"logs")
   dir.create(log_dir, showWarnings = FALSE, recursive = TRUE)
-  gwas <- MungeSumstats::import_sumstats(ids = id, 
-                                       save_dir = id_dir, 
-                                       nThread = 1, 
-                                       parallel_across_ids = FALSE,
-                                       force_new_vcf = FALSE,
-                                       force_new = FALSE,
-                                       #### Record logs
-                                       log_folder_ind = TRUE,
-                                       log_mungesumstats_msgs = TRUE,
-                                       log_folder = log_dir)
+  gwas <- tryCatch(expr = {
+    MungeSumstats::import_sumstats(ids = id, 
+                                   save_dir = id_dir, 
+                                   nThread = 1, 
+                                   parallel_across_ids = FALSE,
+                                   force_new_vcf = FALSE,
+                                   force_new = FALSE,
+                                   #### Record logs
+                                   log_folder_ind = TRUE,
+                                   log_mungesumstats_msgs = TRUE,
+                                   log_folder = log_dir)
+  }, error = function(x){NA})
   return(setNames(gwas, id))
-}, mc.cores = 32) 
+}) 
  
 ```
 
@@ -99,9 +143,11 @@ munged_files <- list_sumstats(save_dir = save_dir)
 
 ## Download OpenGWAS metadata
 
+**IMPORTANT**: Notice that we assign  "munged_path" using a named list ( `munged_files[metagwas_all$id]`). This is because `find_sumstats` resorts the results (by sample sizes), thus the order is different. Using the named list to extract the values in the order they appear in the data.table ensures the data in each column comes from the same GWAS dataset.
+
 ```{r}
 metagwas_all <- MungeSumstats::find_sumstats(ids = names(munged_files))
-metagwas_all$munged_path <- munged_files
+metagwas_all$munged_path <- munged_files[metagwas_all$id]
 ```
 
 ## Get genome builds
@@ -154,7 +200,7 @@ message(sum(meta$build_matches)," / ",nrow(meta),
 ## Save metadata
  
 ```{r} 
-save_meta <- file.path(save_dir,"metadata.csv")
+save_meta <- file.path(here::here(),"metadata.csv")
 utils::write.csv(meta,
                  save_meta)
 ```
@@ -165,12 +211,7 @@ utils::write.csv(meta,
 ## Read metadata
 
 ```{r}
-# meta <- read.csv(save_meta)
-meta$trait_group <- stringr::str_extract(
-  tolower(meta$trait),
-  "(alzheimer)|(parkinson)|(amyotrophic)|(frontotemporal dementia)|(dementia)")
-meta[is.na(meta$trait_group),"trait_group"] <- "other"
-
+meta <- read.csv(save_meta)
 ```
 
  
@@ -182,7 +223,7 @@ gene_files <- list_snps_to_genes_files(save_dir = save_dir)
 magma_files <- parallel::mclapply(seq(1,nrow(meta)), function(i){
   MAGMA.Celltyping:::message_parallel("----- ", meta$id[i]," -----")
   if(meta$id[i] %in% names(gene_files)) {
-     MAGMA.Celltyping:::message_parallel("Importing existing annot file.")
+     MAGMA.Celltyping:::message_parallel("Importing existing .genes.out file.")
     return(gene_files[[meta$id[i]]])
   } else{
      tryCatch(expr = {
@@ -204,13 +245,30 @@ we can copy the smaller mapping files into a folder that will
 get pushed to GitHub (i.e. isn't included in the *.gitignore* file).
 
 ```{r}
-gene_files <- list_snps2genes_files(save_dir = save_dir)
+gene_files <- list_snps_to_genes_files(save_dir = save_dir)
 gene_files2 <- copy_snps_to_genes_files(gene_files = gene_files, 
                                         save_dir = here::here("data/MAGMA_Files"), 
                                         overwrite = TRUE)
 
 ```
 
+## Re-save metadata
+
+Add the paths of the gene mapping files to the metadata and resave it.
+
+We will also add a URL that can be used to download the files. 
+
+```{r}
+base_url <- "https://github.com/neurogenomics/MAGMA_Files_Public/raw/master/data/MAGMA_Files"
+
+meta <- meta %>%
+  dplyr::mutate(genemap_path = ifelse(meta$id %in% names(gene_files2), as.character(gene_files2[meta$id]), NA)
+                ) %>%
+  dplyr::mutate(genemap_url = ifelse(is.na(genemap_path),NA,
+                                     file.path(base_url,basename(dirname(genemap_path)),basename(genemap_path))))
+
+write.csv(meta, save_meta)
+```
 
 
 # Construct gene x trait matrix
