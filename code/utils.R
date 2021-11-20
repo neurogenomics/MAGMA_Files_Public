@@ -18,6 +18,7 @@ filter_traits <- function(meta,
                           consortia = NULL,
                           startswith_only = FALSE,
                           exclusion_terms = NULL,
+                          group_var = "trait_group",
                           topn = Inf,
                           verbose = TRUE){
   ### Assign groups by substring search ####
@@ -54,10 +55,18 @@ filter_traits <- function(meta,
   }
   ##### Return only top N datasets ####
   if(!is.infinite(topn)){
-    messager("Only including top",topn,"datasets per trait group.",v=verbose)
-    meta <- meta %>%
-      dplyr::group_by(trait_group) %>%
-      dplyr::top_n(n = topn, wt = N)
+    if(group_var %in% colnames(meta)){
+      messager("Only including top",topn,"datasets per trait group.",v=verbose)
+      meta <- meta %>%
+        dplyr::group_by_at(.vars = group_var) %>%
+        dplyr::top_n(n = topn, wt = N)
+    }else {
+      messager("group_var",paste0("'",group_var,"'"),
+               "is not a column in the meta.",
+               "topn filtering will not be used.",
+               v=verbose)
+    }
+    
   } 
   messager("Returning metadata for",nrow(meta),"GWAS datasets.",v=verbose)
   return(data.table::data.table(meta))
@@ -105,10 +114,13 @@ list_snps_to_genes_files <- function(save_dir,
 #' @return Named character list
 #' 
 #' @keywords internal 
-copy_snps_to_genes_files <- function(gene_files, 
+copy_snps_to_genes_files <- function(search_dir,
+                                     pattern = "*.genes.out$|*.genes.raw$",
                                      save_dir = "MAGMA_Files",
                                      overwrite = FALSE){
   requireNamespace("parallel")
+  gene_files <- list_snps_to_genes_files(save_dir = search_dir, 
+                                         pattern = pattern)
   gene_files2 <- parallel::mclapply(gene_files, function(x){
     message_parallel(basename(x))
     new_file <- file.path(save_dir,

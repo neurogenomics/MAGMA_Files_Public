@@ -65,7 +65,7 @@ Next, we perform a second search for Body Mass Index (BMI)-related traits.
 We are querying these separately because we want to apply some additional filtering such that we only include GWAS with the greatest sample sizes from the UK Biobank, as well as exclude GWAS of "weight *loss*" or "weight *change*". 
 
 ```{r}
-traits2 <- c("body mass index","standing height","weight")
+# traits2 <- c("body mass index","standing height","weight")
 metagwas2 <- MungeSumstats::find_sumstats(traits = traits)
 metagwas2 <- filter_traits(meta = metagwas2, 
                             traits = traits, 
@@ -75,13 +75,20 @@ metagwas2 <- filter_traits(meta = metagwas2,
                             topn = 1) 
 ```
 
+```{r}
+subcategories3 <- c("neurological","Immune","cardio")
+metagwas3 <- MungeSumstats::find_sumstats(subcategories = subcategories3)
+metagwas3 <- filter_traits(meta = metagwas3,  
+                           group_var = "subcategory",
+                           topn = 10) 
+```
 
 Finally, we can merge the metadata from our two GWAS searches.
 We use th `assign_trait_groups` functions to automatically assign mutually-exclusive groups to each of the traits based on our search terms. 
 **NOTE**: You may want to double check the "trait_group" assignments, as these may not always be what you had in mind; e.g. "frontotemporal dementia (FTD)" might get assigned to the generic "dementia" group instead of the more appropriate "frontotemporal dementia" group simply due to the order in which groups were assigned.
 
 ```{r}
-metagwas <- rbind(metagwas1,metagwas2, fill=TRUE)
+metagwas <- rbind(metagwas1,metagwas2,metagwas3, fill=TRUE)
 traits <- c(traits1,traits2)
 meta <- assign_trait_groups(meta = metagwas, 
                             traits = traits)
@@ -110,7 +117,9 @@ file.remove(bad_files)
 
 
 ```{r}
-gwas_paths <- parallel::mclapply("ukb-b-14043", function(id){
+gwas_paths <- parallel::mclapply(seq_len(nrow(meta$id)), function(i){
+  MAGMA.Celltyping:::message_parallel(i," ========== >")
+  id <- meta$id[i]
   id_dir <- file.path(save_dir,id)
   dir.create(id_dir, showWarnings = FALSE, recursive = TRUE)
   log_dir <- file.path(id_dir,"logs")
@@ -221,7 +230,8 @@ meta <- read.csv(save_meta)
 gene_files <- list_snps_to_genes_files(save_dir = save_dir)
 
 magma_files <- parallel::mclapply(seq(1,nrow(meta)), function(i){
-  MAGMA.Celltyping:::message_parallel("----- ", meta$id[i]," -----")
+  MAGMA.Celltyping:::message_parallel("----- ",i," : ",
+                                      meta$id[i]," -----")
   if(meta$id[i] %in% names(gene_files)) {
      MAGMA.Celltyping:::message_parallel("Importing existing .genes.out file.")
     return(gene_files[[meta$id[i]]])
@@ -245,11 +255,15 @@ we can copy the smaller mapping files into a folder that will
 get pushed to GitHub (i.e. isn't included in the *.gitignore* file).
 
 ```{r}
-gene_files <- list_snps_to_genes_files(save_dir = save_dir)
-gene_files2 <- copy_snps_to_genes_files(gene_files = gene_files, 
+
+gene_files2 <- copy_snps_to_genes_files(save_dir = save_dir, 
                                         save_dir = here::here("data/MAGMA_Files"), 
                                         overwrite = TRUE)
 
+#### Find smallest files for demo purposes ####
+# f <- unlist(gene_files2)
+# data.frame(file=f,
+#            size=file.info(f)$size) %>% dplyr::arrange(size)
 ```
 
 ## Re-save metadata
