@@ -159,24 +159,11 @@ metagwas_all <- MungeSumstats::find_sumstats(ids = names(munged_files))
 metagwas_all$munged_path <- munged_files[metagwas_all$id]
 ```
 
-## Get genome builds
-
-### Gather from log files
-
-```{r}
-log_data <- parse_logs(save_dir = save_dir)
-knitr::kable(log_data)
-```
+## Get genome builds 
 
 ### Infer from data
 
-`MungeSumstats` automatically keeps log files in the `tempdir()`. 
-But if you restart your R session mid-way, they'll be erased. 
-Or perhaps you ran `MungeSumstats` without turning on any of the log arguments.
 
-Instead, you can infer the genome build directly from the data. 
-Note that this will take some time as the genome reference data needed 
-to make these inferences is quite large.
 
 ```R
 builds <- MungeSumstats::get_genome_builds(sumstats_list = munged_files, 
@@ -184,36 +171,6 @@ builds <- MungeSumstats::get_genome_builds(sumstats_list = munged_files,
                                            names_from_paths =TRUE)
 table(metagwas_all$build_inferred)
 ```
-
-## Merge metadata
-
-Now we will merged the metadata from OpenGWAS and 
-our parsed `MungeSumstats` logs. 
-
-We will use this information to create a new column that examine
-whether the genome-build `MungeSumstats` inferred from the each GWAS dataset (*"build_inferred"*) matches the build reported by OpenGWAS (*"build"*).
-
-```{r}
-meta <- merge(metagwas_all, log_data, by = "id")
-#### Find which GWAS have different inferred genome builds ####
-meta$build_matches <- toupper(
-  stringr::str_split(meta$build,"/",
-                     simplify = TRUE)[,2]
-  )==meta$build_inferred
-#### Summarise ####
-message(sum(meta$build_matches)," / ",nrow(meta),
-        " inferred genome builds match the reported genome build.")
-```
-
-
-## Save metadata
- 
-```{r} 
-save_meta <- file.path(here::here(),"metadata.csv")
-utils::write.csv(meta,
-                 save_meta)
-```
-
 
 # Map SNPs to genes
 
@@ -233,7 +190,7 @@ magma_files <- parallel::mclapply(seq(1,nrow(meta)), function(i){
   MAGMA.Celltyping:::message_parallel("----- ",i," : ",
                                       meta$id[i]," -----")
   if(meta$id[i] %in% names(gene_files)) {
-     MAGMA.Celltyping:::message_parallel("Importing existing .genes.out file.")
+     MAGMA.Celltyping:::message_parallel("Skipping: Precomputed .genes.out file detected.")
     return(gene_files[[meta$id[i]]])
   } else{
      tryCatch(expr = {
@@ -256,7 +213,7 @@ get pushed to GitHub (i.e. isn't included in the *.gitignore* file).
 
 ```{r}
 
-gene_files2 <- copy_snps_to_genes_files(save_dir = save_dir, 
+gene_files2 <- copy_snps_to_genes_files(search_dir = save_dir,
                                         save_dir = here::here("data/MAGMA_Files"), 
                                         overwrite = TRUE)
 
@@ -276,10 +233,10 @@ We will also add a URL that can be used to download the files.
 base_url <- "https://github.com/neurogenomics/MAGMA_Files_Public/raw/master/data/MAGMA_Files"
 
 meta <- meta %>%
-  dplyr::mutate(genemap_path = ifelse(meta$id %in% names(gene_files2), as.character(gene_files2[meta$id]), NA)
+  dplyr::mutate(genesout_path = ifelse(meta$id %in% names(gene_files2$genes.out), as.character(gene_files2$genes.out[meta$id]), NA)
                 ) %>%
-  dplyr::mutate(genemap_url = ifelse(is.na(genemap_path),NA,
-                                     file.path(base_url,basename(dirname(genemap_path)),basename(genemap_path))))
+  dplyr::mutate(genesout_url = ifelse(is.na(genesout_path),NA,
+                                     file.path(base_url,basename(dirname(genesout_path)),basename(genesout_path))))
 
 write.csv(meta, save_meta)
 ```
