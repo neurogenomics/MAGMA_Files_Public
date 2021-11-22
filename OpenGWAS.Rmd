@@ -80,7 +80,7 @@ subcategories3 <- c("neurological","Immune","cardio")
 metagwas3 <- MungeSumstats::find_sumstats(subcategories = subcategories3)
 metagwas3 <- filter_traits(meta = metagwas3,  
                            group_var = "subcategory",
-                           topn = 10) 
+                           topn = 100) 
 ```
 
 Finally, we can merge the metadata from our two GWAS searches.
@@ -92,7 +92,7 @@ metagwas <- rbind(metagwas1,metagwas2,metagwas3, fill=TRUE)
 traits <- c(traits1,traits2)
 meta <- assign_trait_groups(meta = metagwas, 
                             traits = traits)
-knitr::kable(metagwas)
+knitr::kable(meta)
 ```
 
 ## Import sum stats
@@ -117,7 +117,7 @@ file.remove(bad_files)
 
 
 ```{r}
-gwas_paths <- parallel::mclapply(seq_len(nrow(meta$id)), function(i){
+gwas_paths <- parallel::mclapply(seq_len(nrow(meta)), function(i){
   MAGMA.Celltyping:::message_parallel(i," ========== >")
   id <- meta$id[i]
   id_dir <- file.path(save_dir,id)
@@ -147,7 +147,7 @@ gwas_paths <- parallel::mclapply(seq_len(nrow(meta$id)), function(i){
 ## Gather file paths 
 
 ```{r}
-munged_files <- list_sumstats(save_dir = save_dir)
+# munged_files <- list_sumstats(save_dir = save_dir)
 ```
 
 ## Download OpenGWAS metadata
@@ -155,8 +155,8 @@ munged_files <- list_sumstats(save_dir = save_dir)
 **IMPORTANT**: Notice that we assign  "munged_path" using a named list ( `munged_files[metagwas_all$id]`). This is because `find_sumstats` resorts the results (by sample sizes), thus the order is different. Using the named list to extract the values in the order they appear in the data.table ensures the data in each column comes from the same GWAS dataset.
 
 ```{r}
-metagwas_all <- MungeSumstats::find_sumstats(ids = names(munged_files))
-metagwas_all$munged_path <- munged_files[metagwas_all$id]
+# metagwas_all <- MungeSumstats::find_sumstats(ids = names(munged_files))
+# metagwas_all$munged_path <- munged_files[metagwas_all$id]
 ```
 
 ## Get genome builds 
@@ -177,7 +177,8 @@ table(metagwas_all$build_inferred)
 ## Read metadata
 
 ```{r}
-meta <- read.csv(save_meta)
+# meta <- read.csv(save_meta)
+meta <- gather_metadata(save_dir = save_dir)
 ```
 
  
@@ -230,15 +231,7 @@ Add the paths of the gene mapping files to the metadata and resave it.
 We will also add a URL that can be used to download the files. 
 
 ```{r}
-base_url <- "https://github.com/neurogenomics/MAGMA_Files_Public/raw/master/data/MAGMA_Files"
-
-meta <- meta %>%
-  dplyr::mutate(genesout_path = ifelse(meta$id %in% names(gene_files2$genes.out), as.character(gene_files2$genes.out[meta$id]), NA)
-                ) %>%
-  dplyr::mutate(genesout_url = ifelse(is.na(genesout_path),NA,
-                                     file.path(base_url,basename(dirname(genesout_path)),basename(genesout_path))))
-
-write.csv(meta, save_meta)
+meta <- gather_metadata(save_dir = save_dir)
 ```
 
 
