@@ -31,7 +31,7 @@ message_parallel <- MAGMA.Celltyping:::message_parallel
 #' @param verbose Print messages.
 #' 
 #' @export
-merge_metadata <- function(save_dir, 
+gather_metadata <- function(save_dir, 
                             use_logs = TRUE,
                             infer_builds = FALSE,
                             save_meta = here::here("metadata.csv"),
