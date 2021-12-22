@@ -17,10 +17,15 @@ These files can be imported using `MAGMA_celltyping::import_magma`.
 
 ```{r, eval=FALSE}
 if(!require(remotes)) install.packages("remotes")
-if(!require(EWCE)) remotes::install_github("nathanskene/EWCE@bschilder_dev")
 if(!require(MAGMA.celltyping)) remotes::install_github("neurogenomics/MAGMA_celltyping@bschilder_dev") 
 ```
 
+```{r, eval=FALSE}
+#### Search the MAGMA_Files_Public database's metadata ####
+meta <- MAGMA.Celltyping::magma_files_metadata
+#### Import MAGMA files ####
+magma_dirs <- MAGMA.Celltyping::import_magma_files(ids = c("ieu-a-298"))
+```
 
 ## [Metadata report](https://neurogenomics.github.io/MAGMA_Files_Public/vignettes/metadata_report.html) 
 
