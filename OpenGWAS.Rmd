@@ -1,8 +1,7 @@
 ---
 title: "OpenGWAS"
-author: "Brian M. Schilder"
-date: "`r Sys.Date()`"
-csl: nature.csl
+author: "<h4>Author: <i>Brian M. Schilder</i></h4>"
+date: "<h4>Updated: <i>`r format( Sys.Date(), '%b-%d-%Y')`</i></h4>"
 output:
   BiocStyle::html_document:
 vignette: >
@@ -221,6 +220,7 @@ magma_matrix <- phenomix::gene_trait_matrix(magma_files = magma_files,
                                             mc.cores = 10) 
 ```
 
+<hr> 
 
 # Session Info
 
@@ -231,3 +231,5 @@ utils::sessionInfo()
 ```
 
 </details>
+
+<br>

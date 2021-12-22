@@ -1,0 +1,175 @@
+---
+title: "metadata_report"
+author: "<h4>Author: <i>Brian M. Schilder</i></h4>"
+date: "<h4>Updated: <i>`r format( Sys.Date(), '%b-%d-%Y')`</i></h4>"
+output: rmarkdown::html_vignette
+vignette: >
+    %\VignetteIndexEntry{metadata_report} 
+    %\usepackage[utf8]{inputenc}
+    %\VignetteEngine{knitr::rmarkdown}
+--- 
+
+```{r setup, include=TRUE}
+library(here)
+library(ggplot2)
+library(dplyr)
+```
+
+
+# Import metadata 
+
+```{r}
+meta <- data.table::fread(here::here("metadata.csv"), drop = "V1")
+
+knitr::kable(head(meta))
+```
+
+
+
+# Plot 
+
+## Categorical metadata
+
+```{r, fig.height=10, fig.width=14}
+variables <- c("category", "subcategory", "consortium", "population", "unit")
+# palettes <- rownames(subset(RColorBrewer::brewer.pal.info, category=="div"))
+palettes <- c(pals::stevens.pinkblue, 
+              pals::arc.bluepink,
+              pals::brewer.bugn,
+              pals::brewer.seqseq2,
+              pals::brewer.bupu)
+
+gg_pies <- lapply(seq_len(length(variables)), function(i){
+  v <- variables[i]
+  pal <- palettes[i]
+  n_colors <- dplyr::n_distinct(meta[[v]])
+  message(v)
+  #### Prepare data ####
+  pie_data <- meta %>% 
+  dplyr::mutate_at(.vars = dplyr::all_of(v), 
+                   .funs = function(v){ifelse(v=="NA", NA, v)}) %>%
+  dplyr::group_by_at(dplyr::all_of(v)) %>%
+  dplyr::count() %>%
+  data.table::data.table() %>% 
+  dplyr::mutate_at(.vars = v,
+                   .funs = stringr::str_trunc, 25)
+  #### Plot ####                  
+  ggplot(pie_data, 
+         aes_string(x=1, y="n", fill=v)) + 
+  geom_bar(width = 1, stat = "identity") +
+  coord_polar(theta = "y") + 
+  labs(title=v, x=NULL, y=NULL) + 
+  theme_bw()+ 
+  theme(aspect.ratio = 1, 
+        legend.position = "bottom",
+        legend.title = element_blank(), 
+        axis.text.x = element_blank(),
+        axis.text.y = element_blank()) +
+  guides(fill = guide_legend(ncol = 2)) + 
+  scale_fill_manual(values = palettes[[i]](n = n_colors))
+}) %>% `names<-`(variables)
+
+patchwork::wrap_plots(gg_pies, nrow = 1)
+
+```
+
+## Over time
+
+```{r, fig.height=10, fig.width=10}
+variables <- c("nsnp","N","population")
+time_data <- meta %>% 
+  dplyr::select(id, year, all_of(variables)) %>%
+  dplyr::mutate(year=factor(year,
+                            levels = sort(unique(meta$year)),
+                            ordered = TRUE), 
+                population = stringr::str_trunc(population, 25))
+
+gg_time <- lapply(seq_len(length(variables)), function(i){
+  v <- variables[i]
+  message(v)
+  ggplot(time_data, 
+         aes_string(x="year", y=v, color=v)) +
+    geom_boxplot() + 
+    geom_point(alpha=.5) +
+    geom_jitter(height = 0) + 
+    theme_bw() +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+    labs(title=v)
+}) %>% `names<-`(variables)
+
+patchwork::wrap_plots(gg_time, ncol = 1)
+
+```
+
+## Genome builds
+
+```{r, fig.height=10, fig.width=10}
+library(ggalluvial) 
+alluv_data <- meta %>% 
+  dplyr::select(build, build_inferred, build_matches, category) %>%
+  dplyr::mutate(n=1, 
+                build = gsub("HG19/GRCh37","GRCH37",build))
+
+# ggalluvial::is_alluvia_form(alluv_data)
+ggplot(alluv_data, 
+       aes(y = n, 
+           axis1 = category,
+           axis2 = build_inferred)) +
+  ggalluvial::geom_alluvium(aes(fill=build_matches)) +
+  ggalluvial::geom_stratum(width = 1/12, fill = "black", color = "grey") +
+  geom_label(stat = "stratum", aes(label = after_stat(stratum))) +
+  scale_x_discrete(limits = c("build", "build_inferred"), expand = c(.05, .05)) +
+  scale_fill_brewer(type = "qual", palette = "Set1") +
+  theme_bw() +
+  labs(title="Genome builds: OpenGWAS metadata vs. Inferred")
+```
+
+
+## SNP filtering 
+
+```{r}
+variables <- sort(grep("snps",colnames(meta), value = TRUE),
+                  decreasing = TRUE)
+filt_data <- meta[,..variables]
+```
+
+### Histograms 
+
+```{r, fig.height=10, fig.width=10}
+gg_hist <- lapply(seq_len(length(variables)), function(i){
+  v <- variables[i]
+  message(v)
+  ggplot(filt_data, 
+         aes_string(x = v)) +
+  geom_histogram(bins = 75) + 
+  theme_bw() 
+}) %>% `names<-`(variables)
+
+patchwork::wrap_plots(gg_hist, ncol = 2)
+```
+
+## Counts
+
+```{r, fig.height=10, fig.width=10}
+filt_data2 <- filt_data %>% data.table::melt.data.table()
+
+gg_filt <- ggplot(filt_data2, aes(x=value, y=variable)) +
+  geom_boxplot() +
+  geom_point(alpha=.5) + 
+  theme_bw() +
+  theme(axis.text.x = element_text(angle=45, hjust=1))
+
+gg_filt
+```
+
+# Session Info
+
+<details>
+
+```{r}
+utils::sessionInfo()
+```
+
+</details>
+
+<br>

@@ -22,7 +22,10 @@ if(!require(MAGMA.celltyping)) remotes::install_github("neurogenomics/MAGMA_cell
 ```
 
 
-# Session Info
+## [Metadata report](https://neurogenomics.github.io/MAGMA_Files_Public/vignettes/metadata_report.html) 
+
+
+## Session Info
 
 <details>
 
