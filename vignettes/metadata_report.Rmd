@@ -2,7 +2,7 @@
 title: "metadata_report"
 author: "<h4>Author: <i>Brian M. Schilder</i></h4>"
 date: "<h4>Updated: <i>`r format( Sys.Date(), '%b-%d-%Y')`</i></h4>"
-output: rmarkdown::html_vignette
+output: rmarkdown::html_document
 vignette: >
     %\VignetteIndexEntry{metadata_report} 
     %\usepackage[utf8]{inputenc}
