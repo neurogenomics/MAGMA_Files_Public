@@ -1,6 +1,6 @@
 ---
 title: "metadata_report"
-author: "<h4>Author: <i>Brian M. Schilder</i></h4>"
+author: "<h4>Authors: <i>Brian M. Schilder, Alan Murphy</i></h4>"
 date: "<h4>Updated: <i>`r format( Sys.Date(), '%b-%d-%Y')`</i></h4>"
 output: rmarkdown::html_document
 vignette: >
@@ -13,7 +13,13 @@ vignette: >
 library(here)
 library(ggplot2)
 library(dplyr)
+library(data.table)
 ```
+
+# Background
+
+Analysis of metadata from [MungeSumstats](https://academic.oup.com/bioinformatics/article/37/23/4593/6380562)
+quality control and standardisation of 714 GWAS summary statistics from IEU GWAS.
 
 
 # Import metadata 
@@ -29,6 +35,9 @@ knitr::kable(head(meta))
 # Plot 
 
 ## Categorical metadata
+
+First, let's get a sense of the characteristics of the different GWAS summary 
+statistics:
 
 ```{r, fig.height=10, fig.width=14}
 variables <- c("category", "subcategory", "consortium", "population", "unit")
@@ -103,6 +112,26 @@ patchwork::wrap_plots(gg_time, ncol = 1)
 
 ## Genome builds
 
+All genome builds on IEU GWAS should be hg19/GRCh37, is this actually the case?:
+
+```{r}
+ggplot(meta,aes(x=build_inferred,fill=build_inferred))+
+  geom_bar()+
+  geom_text(aes( label = paste0(format(100*..count../nrow(meta), digits=2, 
+                                  drop0trailing=TRUE),"% - ",..count..),
+                 y= ..count.. ), stat= "count", vjust = -.5)+
+  scale_fill_manual(values=c("purple","orange"))+
+  theme_bw()+
+  labs(y= "Number of Studies", 
+       x = "Inferred Genomic Build") +
+  theme(strip.background=element_blank(),
+        legend.position = "none")
+```
+
+So 25 studies of what we evaluated actually are GRCh38!
+
+More detail:
+
 ```{r, fig.height=10, fig.width=10}
 library(ggalluvial) 
 alluv_data <- meta %>% 
@@ -133,7 +162,9 @@ variables <- sort(grep("snps",colnames(meta), value = TRUE),
 filt_data <- meta[,..variables]
 ```
 
-### Histograms 
+### Quality Control of SNPs
+
+Overview charts:
 
 ```{r, fig.height=10, fig.width=10}
 gg_hist <- lapply(seq_len(length(variables)), function(i){
@@ -148,7 +179,61 @@ gg_hist <- lapply(seq_len(length(variables)), function(i){
 patchwork::wrap_plots(gg_hist, ncol = 2)
 ```
 
-## Counts
+How many SNPs fail quality control checks?:
+
+```{r}
+meta[,snps_dropped_total:=nsnp-snps_end]
+#add constand column for plot
+meta[,sumstats:="sumstats"]
+ggplot(meta,aes(x=sumstats,y=snps_dropped_total/nsnp,fill=sumstats))+
+  geom_violin()+
+  geom_boxplot(width=0.05)+
+  theme_bw()+
+  labs(y= "Proportion of SNPs failed quality control", x = "") +
+  theme(strip.background=element_blank(),
+        legend.position = "none")
+```
+
+
+And why are these SNPs removed?:
+
+```{r}
+snps_dropped <- melt(meta[,c("id","nsnp","snps_dropped_nonA1A2",
+                             "snps_dropped_nonRef","snps_dropped_chrom",
+                             "snps_dropped_INFO","snps_dropped_duplicates")],
+                     id.vars=c("id","nsnp"))
+#remove snps_dropped_
+snps_dropped[,variable:=substring(variable, 14)]
+
+ggplot(snps_dropped,aes(x=variable,y=value/nsnp,fill=variable))+
+  geom_violin()+
+  geom_boxplot(width=0.02)+
+  theme_bw()+
+  labs(y= "Proportion of SNPs failed quality control", 
+       x = "Exclusion criteria") +
+  theme(strip.background=element_blank(),
+        legend.position = "none")
+
+```
+
+INFO filtering is the biggest determinant, if we remove and replot?
+
+```{r}
+
+ggplot(snps_dropped[variable!="INFO"],
+        aes(x=variable,y=value/nsnp,fill=variable))+
+  geom_violin()+
+  geom_boxplot(width=0.02)+
+  theme_bw()+
+  labs(y= "Proportion of SNPs failed quality control", 
+       x = "Exclusion criteria") +
+  theme(strip.background=element_blank(),
+        legend.position = "none")
+
+```
+
+
+Further detail:
 
 ```{r, fig.height=10, fig.width=10}
 filt_data2 <- filt_data %>% data.table::melt.data.table()
@@ -161,6 +246,28 @@ gg_filt <- ggplot(filt_data2, aes(x=value, y=variable)) +
 
 gg_filt
 ```
+
+
+## Effect direction of SNPs
+
+The effect direction or SNPs is also evaluated against a reference genome and in
+cases where it is incorrect, it is corrected. Let's check how many are 
+corrected:
+
+```{r}
+
+ggplot(meta,aes(x=snps_flipped/nsnp,fill=sumstats))+
+  geom_histogram(bins = 75)+
+  theme_bw()+
+  labs(x= "Proportion of SNPs flipped", x = "Number of studies") +
+  theme(strip.background=element_blank(),
+        legend.position = "none")
+
+```
+
+
+There are about 25/30 GWAS sumstats which contain SNPs with an incorrect 
+direction (accounting for about 18% of all SNPs in those studies).
 
 # Session Info
 
