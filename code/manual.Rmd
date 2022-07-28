@@ -1,0 +1,149 @@
+---
+title: "Vuckovic2020"
+author: "<h4>Author: <i>Brian M. Schilder</i></h4>"
+date: "<h4>Updated: <i>`r format( Sys.Date(), '%b-%d-%Y')`</i></h4>"
+output:
+  BiocStyle::html_document:
+vignette: >
+    %\VignetteIndexEntry{OpenGWAS} 
+    %\usepackage[utf8]{inputenc}
+    %\VignetteEngine{knitr::rmarkdown}
+---
+
+```{r setup, include=TRUE}
+knitr::opts_chunk$set(echo = TRUE)
+
+save_dir <- here::here("data/GWAS_sumstats")
+source(here::here("code/utils.R"))
+```
+
+# Wightman2021 
+
+GWAS summary stats are hosted on
+the [Posthuma lab website](https://ctg.cncr.nl/software/summary_statistics).
+
+```{r}
+# header: "chr" "PosGRCh37" "testedAllele" "otherAllele" "z" "p" "N"  
+mapping_file <- MungeSumstats:::sumstatsColHeaders
+mapping_file <- rbind(mapping_file,
+                      data.frame("Uncorrected"=c("POSGRCH37","TESTEDALLELE"),
+                                 "Corrected"=c("BP","A1"))) 
+path <- "https://ctg.cncr.nl/documents/p1651/PGCALZ2sumstatsExcluding23andMe.txt.gz"
+dat <- data.table::fread(path) 
+tmp <- file.path(tempdir(),basename(path))
+data.table::fwrite(dat, tmp, sep="\t", nThread = 50)
+
+id <- "Wightman2021"
+# unlink(list.dirs(here::here("data/GWAS_sumstats",id,"logs")), recursive = T)
+gwas_paths <- MungeSumstats::format_sumstats(
+  path = tmp,
+  save_path = here::here("data/GWAS_sumstats",id,paste0(id,".tsv.gz")),
+  ref_genome = "GRCh37",
+  nThread = 40,
+  force_new = FALSE,
+  #### Record logs  
+  log_folder = here::here("data/GWAS_sumstats",id,"logs"),
+  log_folder_ind = TRUE,
+  log_mungesumstats_msgs = TRUE, 
+  mapping_file = mapping_file) 
+```
+
+
+
+# Vuckovic2020
+
+Generate weighted gene lists for each blood trait GWAS from:  
+> Vuckovic D, et al. The Polygenic and Monogenic Basis of Blood Traits and Diseases. Cell. 2020 Sep 3;182(5):1214-1231.e11. [doi: 10.1016/j.cell.2020.08.008](https://doi.org/10.1016/j.cell.2020.08.008)
+
+Data source: 
+- [UK Biobank subset](ftp://ftp.sanger.ac.uk/pub/project/humgen/summary_statistics/UKBB_blood_cell_traits/): 
+- [Meta-analyses (link broken)](http://www.mhi-humangenetics.org/en/resources): 746,667 subjects across 5 ancestries.
+
+Below, we analyse only the UK Biobank subset of the results, as the link to the full meta-analyses are now broken. 
+
+## List raw files 
+ 
+```{r}
+files <- list.files("/home/bms20/RDS/project/neurogenomics-lab/live/Data/GWAS_sumstats/Original/Bloodtraits_Vuckovic_2020", full.names = TRUE)
+names(files) <- gsub("\\.assoc","", basename(files))
+```
+
+## Munge summary stats
+
+```{r}
+files_munged <- mapply(files, 
+                       SIMPLIFY = FALSE, 
+                       FUN = function(f){
+  message("Processing: ",basename(f))
+  nm <- paste0("Vuckovic2020.",gsub("\\.assoc","",basename(f)))
+  save_dir <- here::here("data/GWAS_sumstats",nm)
+  MungeSumstats::format_sumstats(
+    path = f, 
+    save_path = file.path(save_dir,paste0(nm,".tsv.gz")),
+    log_folder = file.path(save_dir,"logs"),
+    log_folder_ind = TRUE,
+    log_mungesumstats_msgs = TRUE,
+    nThread = 30
+    )
+})
+```
+
+## Map SNPs to genes 
+
+Unfortunately, per-SNP sample size is not included in any of the summary stats provided. Instead, we must assume a sample size of 408,112 for all blood trait GWAS, as reported in the original paper. 
+
+```{r}
+# gene_files <- list_snps_to_genes_files(save_dir = save_dir)
+sumstats <- MungeSumstats::list_sumstats(save_dir = save_dir,
+                                         pattern = "Vuckovic")
+
+t1 <- Sys.time()
+magma_files <- parallel::mclapply(sumstats,
+                                  function(x){ 
+  MAGMA.Celltyping:::message_parallel("----- Processing: ",x," -----") 
+     tryCatch(expr = {
+       MAGMA.Celltyping::map_snps_to_genes(
+         path_formatted = x,
+         genome_build = "GRCH37",
+         ## Assuming equal sample size across all GWAS 
+         ## (only one N was reported in the paper)
+         N = 408112,
+         ## These UKB GWAS only use British European ancestry individuals 
+         population = "EUR",
+         upstream_kb = 35,  
+         downstream_kb = 10, 
+         force_new = FALSE
+         )
+     }, error = function(e) {message(e);NULL}) 
+}, mc.cores = min(length(sumstats),40) )
+t2 <- Sys.time()
+print(t2-t1)
+```
+
+
+# Gather snps2genes files
+
+Now that all the GWAS have been mapped from SNPs to genes, 
+we can copy the smaller mapping files into a folder that will 
+get pushed to GitHub (i.e. isn't included in the *.gitignore* file).
+
+```{r}
+gene_files2 <- copy_snps_to_genes_files(search_dir = save_dir,
+                                        save_dir = here::here("data/MAGMA_Files"), 
+                                        overwrite = FALSE) 
+```
+
+<hr> 
+
+# Session Info
+
+<details>
+
+```{r}
+utils::sessionInfo()
+```
+
+</details>
+
+<br>
+

@@ -1,0 +1,272 @@
+---
+title: "OpenGWAS"
+author: "<h4>Author: <i>Brian M. Schilder</i></h4>"
+date: "<h4>Updated: <i>`r format( Sys.Date(), '%b-%d-%Y')`</i></h4>"
+output:
+  BiocStyle::html_document:
+vignette: >
+    %\VignetteIndexEntry{OpenGWAS} 
+    %\usepackage[utf8]{inputenc}
+    %\VignetteEngine{knitr::rmarkdown}
+---
+
+# Install packages
+
+To install the dev branch of `MAGMA.Celltyping`, use:
+
+```{r, eval=FALSE, include=TRUE}
+if(!require("remotes")) install.packages("remotes")
+if(!require("here")) install.packages("here")
+if(!require("BiocManager")) install.packages("BiocManager")
+
+if(!require("MAGMA.Celltyping")) {
+  remotes::install_github("neurogenomics/MAGMA_Celltyping", dependencies = TRUE)
+}
+if(!require("MungeSumstats") | packageVersion("MungeSumstats")<"1.3.17") {
+   remotes::install_github("neurogenomics/MungeSumstats", dependencies = TRUE)
+}
+if(!require("EWCE") | packageVersion("EWCE")<"1.3.1"){
+  remotes::install_github("NathanSkene/EWCE", dependencies = TRUE)
+} 
+```
+
+
+```{r setup, include=TRUE}
+library(MAGMA.Celltyping)
+library(MungeSumstats)
+library(data.table)
+library(ggplot2)
+library(dplyr)
+
+source(here::here("code/utils.R"))
+
+save_dir <- here::here("data/GWAS_sumstats")
+dir.create(save_dir, showWarnings = FALSE, recursive = TRUE)
+```
+
+# Munge sum stats
+
+## Find sum stats
+
+### Neurodegeneration traits
+
+First, we will search for GWAS of several neurodegenerative disease traits.
+
+```{r} 
+traits1 <- c("Alzheimer","Parkinson","amyotrophic",
+             "frontotemporal dementia","dementia")
+metagwas1 <- MungeSumstats::find_sumstats(traits = traits1)
+```
+
+### BMI traits
+
+Next, we perform a second search for Body Mass Index (BMI)-related traits.
+We are querying these separately because we want to apply some additional filtering such that we only include GWAS with the greatest sample sizes from the UK Biobank, as well as exclude GWAS of "weight *loss*" or "weight *change*". 
+
+```{r}
+traits2 <- c("body mass index","standing height","weight")
+metagwas2 <- MungeSumstats::find_sumstats(traits = traits2)
+metagwas2 <- filter_traits(meta = metagwas2, 
+                            traits = traits2, 
+                            consortia = c("Neale Lab","UK Biobank"),
+                            exclusion_terms = c("loss","change"),
+                            startswith_only = TRUE,
+                            topn = 1) 
+```
+
+### Sampling of neuro/immuno/cardio traits
+
+Take only the top 100 most well-powered studies, to start.
+
+```{r}
+subcategories3 <- c("neurological","Immune","cardio")
+metagwas3 <- MungeSumstats::find_sumstats(subcategories = subcategories3)
+metagwas3 <- filter_traits(meta = metagwas3,  
+                           group_var = "subcategory",
+                           topn = 100) 
+```
+
+## All UKB traits
+
+```{r}
+metagwas4  <- MungeSumstats::find_sumstats(consortia = c("Neale Lab","UK Biobank"))
+```
+
+Finally, we can merge the metadata from our two GWAS searches.
+We use th `assign_trait_groups` functions to automatically assign mutually-exclusive groups to each of the traits based on our search terms. 
+**NOTE**: You may want to double check the "trait_group" assignments, as these may not always be what you had in mind; e.g. "frontotemporal dementia (FTD)" might get assigned to the generic "dementia" group instead of the more appropriate "frontotemporal dementia" group simply due to the order in which groups were assigned.
+
+```{r}
+# metagwas5 <- MungeSumstats::find_sumstats(consortia = "PGC")
+
+metagwas <- rbind(metagwas1,metagwas2,metagwas3,metagwas4, fill=TRUE)
+traits <- c(traits1,traits2,subcategories3,"UKB")
+meta <- assign_trait_groups(meta = metagwas, 
+                            traits = traits)
+knitr::kable(meta)
+```
+
+## Import sum stats
+
+`MungeSumstats::import_sumstats` already supports parallelisation 
+across multiple GWAS (by setting `nThread` >1). 
+However, the log files would all 
+overwrite one another. 
+
+So we instead parellelise this step ourselves,
+saving each summary stats file in it's own folder with a 
+subdirectory for its respective log files.
+
+## OpenGWAS
+ 
+```{r}
+# munged_files <- list_sumstats(save_dir = save_dir)
+#### First, let's remove incomplete files.  ####
+# bad_files <- munged_files[file.info(munged_files)$size <100]
+# file.remove(bad_files)
+
+# unlink("data/GWAS_sumstats/",recursive = TRUE, force = TRUE); 
+# unlink("data/VCFs/",recursive = TRUE, force = TRUE); 
+
+gwas_paths <- MungeSumstats::import_sumstats(
+  ids = "ieu-b-4956", 
+  save_dir = here::here("data/GWAS_sumstats"), 
+  # nThread = 50, 
+  parallel_across_ids = FALSE, 
+  force_new_vcf = FALSE,
+  force_new = FALSE,
+  vcf_download = TRUE,
+  vcf_dir = here::here("data/VCFs"),
+  ### axel will keep trying forever if the URL doesn't exist (or is private)
+  # download_method = "axel",
+  #### Record logs
+  # log_folder_ind = TRUE,
+  # log_mungesumstats_msgs = TRUE,
+  ) 
+```
+
+
+# Create metadata file 
+
+```{r}
+meta <- gather_metadata(save_dir = save_dir)
+```
+
+# Map SNPs to genes 
+
+
+## Translate subpopulations
+
+We need to use the appropriate 1000 Genomes Project (1KG)
+linkage disequilibrium (LD) reference for each GWAS based on the 
+subpopulation that the GWAS was conducted
+in. Here we map the subpopulation names used by OpenGWAS to those used by 1KG.
+
+The LD references provided by MAGMA are already subdivided by population, 
+which means you can't select more than one (or all) subpopulations 
+as a reference. This is a limitation we would like to address in the future
+by provided our own LD reference files.
+
+```{r}
+# meta_all <- MungeSumstats::find_sumstats()
+# opts <- toupper(eval(formals(MAGMA.Celltyping::get_genome_ref)$population))
+
+popdict <- c("European"="EUR", 
+             "South Asian"="SAS",
+             "African American or Afro-Caribbean"="AFR",
+             "Greater Middle Eastern (Middle Eastern, North African, or Persian)"="EUR",# not ideal
+             "East Asian"="EAS",
+             "Mixed"="AMR", # not ideal
+             "Hispanic or Latin American"="AMR",
+             "Asian unspecified"="EAS", # not ideal
+             "Sub-Saharan African"="AFR",
+             "NA"="EUR", # not ideal
+             "African unspecified"="AFR",
+             "South East Asian"="EAS" # not ideal
+             )
+```
+
+```{r}
+gene_files <- list_snps_to_genes_files(save_dir = save_dir)
+
+t1 <- Sys.time()
+magma_files <- parallel::mclapply(seq(1,nrow(meta)), function(i){
+  
+  MAGMA.Celltyping:::message_parallel("----- ",i," : ",
+                                      meta$id[i]," -----")
+  if(meta$id[i] %in% names(gene_files)) {
+     MAGMA.Celltyping:::message_parallel("Skipping: Precomputed .genes.out file detected.")
+    return(gene_files[[meta$id[i]]])
+  } else{
+     tryCatch(expr = {
+       MAGMA.Celltyping::map_snps_to_genes(
+         path_formatted = meta$munged_path[i],
+         genome_build = meta$build_inferred[i],
+         N = meta$N[i],
+         population = popdict[[meta$population[i]]],
+         upstream_kb = 35,  
+         downstream_kb = 10, 
+         force_new = FALSE
+         )
+     }, error = function(e) {message(e);NULL})
+  }
+}, mc.cores = 40) %>% `names<-`(meta$id) 
+t2 <- Sys.time()
+print(t2-t1)
+
+```
+
+# Gather snps2genes files
+
+Now that all the GWAS have been mapped from SNPs to genes, 
+we can copy the smaller mapping files into a folder that will 
+get pushed to GitHub (i.e. isn't included in the *.gitignore* file).
+
+```{r}
+
+gene_files2 <- copy_snps_to_genes_files(search_dir = save_dir,
+                                        save_dir = here::here("data/MAGMA_Files"), 
+                                        overwrite = FALSE)
+
+#### Find smallest files for demo purposes ####
+# f <- unlist(gene_files2)
+# data.frame(file=f,
+#            size=file.info(f)$size) %>% dplyr::arrange(size)
+```
+
+## Re-save metadata
+
+Add the paths of the gene mapping files to the metadata and resave it.
+
+We will also add a URL that can be used to download the files. 
+
+```{r}
+meta <- gather_metadata(save_dir = save_dir)
+```
+
+
+# Construct gene x trait matrix
+
+Can construct gene x trait matrix from gene-level MAGMA results 
+across multiple GWAS traits.
+
+```R
+magma_matrix <- phenomix::gene_trait_matrix(magma_files = magma_files,
+                                            metric = "ADJ_ZSTAT", 
+                                            save_path = file.path(save_dir,"OpenGWAS_neurodegenGWAS_ADJZSTAT.rds"),
+                                            mc.cores = 10) 
+```
+
+<hr> 
+
+# Session Info
+
+<details>
+
+```{r}
+utils::sessionInfo()
+```
+
+</details>
+
+<br>
