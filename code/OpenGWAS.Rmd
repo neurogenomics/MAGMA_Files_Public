@@ -195,7 +195,6 @@ we can copy the smaller mapping files into a folder that will
 get pushed to GitHub (i.e. isn't included in the *.gitignore* file).
 
 ```{r}
-
 gene_files2 <- copy_snps_to_genes_files(search_dir = save_dir,
                                         save_dir = here::here("data/MAGMA_Files"), 
                                         overwrite = FALSE)

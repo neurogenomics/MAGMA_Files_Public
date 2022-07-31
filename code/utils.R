@@ -98,7 +98,7 @@ add_file_links <- function(meta,
                            user = "neurogenomics",
                            repo = "MAGMA_Files_Public",
                            branch = "master",
-                           data_dir = "data/MAGMA_Files",
+                           data_dir = here::here("data/MAGMA_Files"),
                            include_local_paths = FALSE,
                            verbose = TRUE){ 
   messager("Adding GitHub download URLs for .genes.raw and .genes.out files.",
@@ -106,22 +106,22 @@ add_file_links <- function(meta,
   base_url <- file.path("https://github.com",user,repo,"raw",branch,data_dir)
   if(is.null(gene_files)){
     gene_files <- list()
-    gene_files$genes.raw <- list_snps_to_genes_files(save_dir = data_dir, 
+    gene_files[['genes.raw']] <- list_snps_to_genes_files(save_dir = data_dir, 
                                                      pattern = ".genes.raw$",
                                                      verbose = verbose)
-    gene_files$genes.out <- list_snps_to_genes_files(save_dir = data_dir, 
+    gene_files[["genes.out"]] <- list_snps_to_genes_files(save_dir = data_dir, 
                                                      pattern = ".genes.out$",
                                                      verbose = verbose)
   }
   
-  meta <- meta %>%
+  meta <- meta |>
     dplyr::mutate(genes_raw_path = 
                     ifelse(meta$id %in% names(gene_files$genes.raw), 
                            as.character(gene_files$genes.raw[meta$id]), NA),
                   genes_out_path = 
                     ifelse(meta$id %in% names(gene_files$genes.out), 
                            as.character(gene_files$genes.out[meta$id]), NA)
-    ) %>%
+    ) |>
     dplyr::mutate(genes_raw_url = 
                     ifelse(is.na(genes_raw_path),NA,
                            file.path(base_url,
@@ -134,7 +134,7 @@ add_file_links <- function(meta,
                                      basename(genes_out_path)))
                   )
   if(!include_local_paths){
-    meta <- meta %>% dplyr::select(-genes_raw_path, -genes_out_path)
+    meta <- meta |> dplyr::select(-genes_raw_path, -genes_out_path)
   }
   return(meta)
 }
@@ -277,6 +277,7 @@ filter_traits <- function(meta,
 #' @keywords internal
 list_snps_to_genes_files <- function(save_dir,
                                      pattern = "*.genes.out$",
+                                     sep="\\.tsv\\.gz\\.",
                                      verbose = TRUE){
   gene_files <- list.files(path = save_dir, 
                             pattern = pattern,
@@ -284,9 +285,10 @@ list_snps_to_genes_files <- function(save_dir,
                             full.names = TRUE)
   if(length(gene_files)==0) return(NULL)
   # names(gene_files) <- basename(dirname(dirname(dirname(gene_files))))
-  names(gene_files) <- stringr::str_split(basename(gene_files),"[.]",
+  names(gene_files) <- stringr::str_split(basename(gene_files),
+                                          pattern = sep,
                                           simplify = TRUE)[,1]
-  messager(length(gene_files),"files found.",v=verbose)
+  messager(length(gene_files),pattern,"files found.",v=verbose)
   return(gene_files)
 }
 
