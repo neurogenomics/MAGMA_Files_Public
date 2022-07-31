@@ -48,7 +48,32 @@ gwas_paths <- MungeSumstats::format_sumstats(
   mapping_file = mapping_file) 
 ```
 
+## Map SNPs to genes 
 
+```{r}
+# gene_files <- list_snps_to_genes_files(save_dir = save_dir)
+sumstats <- MungeSumstats::list_sumstats(save_dir = save_dir,
+                                         pattern = "Wightman2021")
+
+t1 <- Sys.time()
+magma_files <- parallel::mclapply(sumstats,
+                                  function(x){ 
+  MAGMA.Celltyping:::message_parallel("----- Processing: ",x," -----") 
+     tryCatch(expr = {
+       MAGMA.Celltyping::map_snps_to_genes(
+         path_formatted = x,
+         genome_build = "GRCH37", 
+         N = 1126563,
+         population = "EUR",
+         upstream_kb = 35,  
+         downstream_kb = 10, 
+         force_new = FALSE
+         )
+     }, error = function(e) {message(e);NULL}) 
+}, mc.cores = min(length(sumstats),40) )
+t2 <- Sys.time()
+print(t2-t1)
+```
 
 # Vuckovic2020
 

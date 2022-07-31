@@ -129,9 +129,9 @@ subdirectory for its respective log files.
 # unlink("data/VCFs/",recursive = TRUE, force = TRUE); 
 
 gwas_paths <- MungeSumstats::import_sumstats(
-  ids = "ieu-b-4956", 
+  ids = meta$id, 
   save_dir = here::here("data/GWAS_sumstats"), 
-  # nThread = 50, 
+  nThread = 50,
   parallel_across_ids = FALSE, 
   force_new_vcf = FALSE,
   force_new = FALSE,
@@ -140,8 +140,8 @@ gwas_paths <- MungeSumstats::import_sumstats(
   ### axel will keep trying forever if the URL doesn't exist (or is private)
   # download_method = "axel",
   #### Record logs
-  # log_folder_ind = TRUE,
-  # log_mungesumstats_msgs = TRUE,
+  log_folder_ind = TRUE,
+  log_mungesumstats_msgs = TRUE,
   ) 
 ```
 
@@ -149,68 +149,40 @@ gwas_paths <- MungeSumstats::import_sumstats(
 # Create metadata file 
 
 ```{r}
-meta <- gather_metadata(save_dir = save_dir)
+meta <- gather_metadata(save_dir = save_dir,
+                        N_dict=c("Wightman2021"=1126563, 
+                                 "Vuckovic2020"=408112))
 ```
 
-# Map SNPs to genes 
-
-
-## Translate subpopulations
-
-We need to use the appropriate 1000 Genomes Project (1KG)
-linkage disequilibrium (LD) reference for each GWAS based on the 
-subpopulation that the GWAS was conducted
-in. Here we map the subpopulation names used by OpenGWAS to those used by 1KG.
-
-The LD references provided by MAGMA are already subdivided by population, 
-which means you can't select more than one (or all) subpopulations 
-as a reference. This is a limitation we would like to address in the future
-by provided our own LD reference files.
-
-```{r}
-# meta_all <- MungeSumstats::find_sumstats()
-# opts <- toupper(eval(formals(MAGMA.Celltyping::get_genome_ref)$population))
-
-popdict <- c("European"="EUR", 
-             "South Asian"="SAS",
-             "African American or Afro-Caribbean"="AFR",
-             "Greater Middle Eastern (Middle Eastern, North African, or Persian)"="EUR",# not ideal
-             "East Asian"="EAS",
-             "Mixed"="AMR", # not ideal
-             "Hispanic or Latin American"="AMR",
-             "Asian unspecified"="EAS", # not ideal
-             "Sub-Saharan African"="AFR",
-             "NA"="EUR", # not ideal
-             "African unspecified"="AFR",
-             "South East Asian"="EAS" # not ideal
-             )
-```
+# Map SNPs to genes  
 
 ```{r}
 gene_files <- list_snps_to_genes_files(save_dir = save_dir)
 
 t1 <- Sys.time()
-magma_files <- parallel::mclapply(seq(1,nrow(meta)), function(i){
+magma_files <- parallel::mclapply(seq_len(nrow(meta)),
+                                  function(i){
   
-  MAGMA.Celltyping:::message_parallel("----- ",i," : ",
+  EWCE:::message_parallel("----- ",i," : ",
                                       meta$id[i]," -----")
   if(meta$id[i] %in% names(gene_files)) {
      MAGMA.Celltyping:::message_parallel("Skipping: Precomputed .genes.out file detected.")
     return(gene_files[[meta$id[i]]])
   } else{
-     tryCatch(expr = {
+     tryCatch(expr = { 
        MAGMA.Celltyping::map_snps_to_genes(
          path_formatted = meta$munged_path[i],
          genome_build = meta$build_inferred[i],
-         N = meta$N[i],
-         population = popdict[[meta$population[i]]],
+         N = if(is.na(meta$N[i])) NULL else meta$N[i],
+         population = meta$population_1KG[i],
          upstream_kb = 35,  
-         downstream_kb = 10, 
+         downstream_kb = 10,
+         genes_only = TRUE, 
          force_new = FALSE
          )
-     }, error = function(e) {message(e);NULL})
+     }, error = function(e) {EWCE:::message_parallel(e);NULL})
   }
-}, mc.cores = 40) %>% `names<-`(meta$id) 
+}, mc.cores = min(length(sumstats),40) ) |> `names<-`(meta$id) 
 t2 <- Sys.time()
 print(t2-t1)
 
