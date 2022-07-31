@@ -105,7 +105,8 @@ add_file_links <- function(meta,
                            verbose = TRUE){ 
   messager("Adding GitHub download URLs for .genes.raw and .genes.out files.",
            v=verbose)
-  base_url <- file.path("https://github.com",user,repo,"raw",branch,data_dir)
+  # "https://github.com/neurogenomics/MAGMA_Files_Public/raw/master/data/MAGMA_Files/ukb-b-956.tsv.gz.35UP.10DOWN/ukb-b-956.tsv.gz.35UP.10DOWN.genes.out"
+  base_url <- paste("https://github.com",user,repo,"raw",branch,"data/MAGMA_Files",sep='/')
   if(is.null(gene_files)){
     gene_files <- list()
     gene_files[['genes.raw']] <- list_snps_to_genes_files(save_dir = data_dir, 
@@ -126,14 +127,18 @@ add_file_links <- function(meta,
     ) |>
     dplyr::mutate(genes_raw_url = 
                     ifelse(is.na(genes_raw_path),NA,
-                           file.path(base_url,
+                           paste(base_url,
                                      basename(dirname(genes_raw_path)),
-                                     basename(genes_raw_path))),
+                                     basename(genes_raw_path),
+                                 sep="/")
+                           ),
                   genes_out_url = 
                     ifelse(is.na(genes_out_path),NA,
-                           file.path(base_url,
+                           paste(base_url,
                                      basename(dirname(genes_out_path)),
-                                     basename(genes_out_path)))
+                                     basename(genes_out_path),
+                                 sep="/")
+                           )
                   )
   if(!include_local_paths){
     meta <- meta |> dplyr::select(-genes_raw_path, -genes_out_path)

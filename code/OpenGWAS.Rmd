@@ -118,6 +118,27 @@ saving each summary stats file in it's own folder with a
 subdirectory for its respective log files.
 
 ## OpenGWAS
+
+**Error types**:
+1. `BiocParallel errors
+  0 remote errors, element index: 
+  50 unevaluated and other errors
+  first remote error:`
+2. No sumstats produced.
+3. Also recorded messages from the wrong/next id!
+
+^ Seems to occurs with smaller files, <2M variants.
+^ VCF and tabix index download fine (checked file sizes against manual download from OpenGWAS).
+^ Only using ~half of available memory at most, so doesn't seem to be crashing due to that.
+^ Seems to trace back to `read_vcf_parallel` step.
+  
+* Problematic IDS: 
+  - *ieu-a-1183*: 1,2,3
+  - *met-b-268*: 1,2,3 
+  - *ieu-a-1043*: 1,2,3
+  - *ieu-a-44*: 1,2,3
+  - *ieu-a-802*: 1,2,3
+  - *ieu-a-806*: 1,2,3
  
 ```{r}
 # munged_files <- list_sumstats(save_dir = save_dir)
@@ -131,7 +152,7 @@ subdirectory for its respective log files.
 gwas_paths <- MungeSumstats::import_sumstats(
   ids = meta$id, 
   save_dir = here::here("data/GWAS_sumstats"), 
-  nThread = 50,
+  nThread = 20,
   parallel_across_ids = FALSE, 
   force_new_vcf = FALSE,
   force_new = FALSE,
