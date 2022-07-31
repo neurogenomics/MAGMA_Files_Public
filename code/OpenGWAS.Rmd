@@ -157,18 +157,14 @@ meta <- gather_metadata(save_dir = save_dir,
 # Map SNPs to genes  
 
 ```{r}
-gene_files <- list_snps_to_genes_files(save_dir = save_dir)
+# gene_files <- list_snps_to_genes_files(save_dir = save_dir)
 
 t1 <- Sys.time()
 magma_files <- parallel::mclapply(seq_len(nrow(meta)),
                                   function(i){
   
   EWCE:::message_parallel("----- ",i," : ",
-                                      meta$id[i]," -----")
-  if(meta$id[i] %in% names(gene_files)) {
-     MAGMA.Celltyping:::message_parallel("Skipping: Precomputed .genes.out file detected.")
-    return(gene_files[[meta$id[i]]])
-  } else{
+                                      meta$id[i]," -----") 
      tryCatch(expr = { 
        MAGMA.Celltyping::map_snps_to_genes(
          path_formatted = meta$munged_path[i],
@@ -180,9 +176,8 @@ magma_files <- parallel::mclapply(seq_len(nrow(meta)),
          genes_only = TRUE, 
          force_new = FALSE
          )
-     }, error = function(e) {EWCE:::message_parallel(e);NULL})
-  }
-}, mc.cores = min(length(sumstats),40) ) |> `names<-`(meta$id) 
+     }, error = function(e) {EWCE:::message_parallel(e);NULL}) 
+}, mc.cores = min(nrow(meta),40) ) |> `names<-`(meta$id) 
 t2 <- Sys.time()
 print(t2-t1)
 

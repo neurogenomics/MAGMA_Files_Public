@@ -84,7 +84,9 @@ gather_metadata <- function(save_dir,
   #### Add missing N #####
   meta <- add_sample_size(meta = meta,
                           N_dict = N_dict)
-  #### Save metadata ####
+  #### Set key ####
+  data.table::setkeyv(meta,"id")
+  #### Save ####
   if(!is.null(save_meta)){
     messager("Saving merged metadata ==>",save_meta,v=verbose)
     MungeSumstats:::unlist_dt(dt = meta)
