@@ -119,7 +119,7 @@ subdirectory for its respective log files.
 
 ## OpenGWAS
 
-**Error types**:
+**Error description**:
 1. `BiocParallel errors
   0 remote errors, element index: 
   50 unevaluated and other errors
@@ -127,10 +127,13 @@ subdirectory for its respective log files.
 2. No sumstats produced.
 3. Also recorded messages from the wrong/next id!
 
-^ Seems to occurs with smaller files, <2M variants.
-^ VCF and tabix index download fine (checked file sizes against manual download from OpenGWAS).
-^ Only using ~half of available memory at most, so doesn't seem to be crashing due to that.
-^ Seems to trace back to `read_vcf_parallel` step.
+
+- Seems to occurs with smaller files, <2M variants.
+- VCF and tabix index download fine (checked file sizes against manual download from OpenGWAS).
+- Only using ~half of available memory at most, so doesn't seem to be crashing due to that.
+- Seems to trace back to `read_vcf_parallel` step.
+- Restarting the Docker container and/or decreasing the number of threads to 30 seems to resolve this.
+  + This suggests that perhaps the issue is breaking the VCFs into too small of chunks when the VCF is already small leads to situations where some chunks are empty, causing an error when being merged with all the other chunks. 
   
 * Problematic IDS: 
   - *ieu-a-1183*: 1,2,3
@@ -152,7 +155,7 @@ subdirectory for its respective log files.
 gwas_paths <- MungeSumstats::import_sumstats(
   ids = meta$id, 
   save_dir = here::here("data/GWAS_sumstats"), 
-  nThread = 20,
+  nThread = 30, # >30 causes issues with read_vcf_parallel
   parallel_across_ids = FALSE, 
   force_new_vcf = FALSE,
   force_new = FALSE,
@@ -173,12 +176,32 @@ gwas_paths <- MungeSumstats::import_sumstats(
 meta <- gather_metadata(save_dir = save_dir,
                         N_dict=c("Wightman2021"=1126563, 
                                  "Vuckovic2020"=408112))
+data.table::setkey(meta,id)
 ```
 
 # Map SNPs to genes  
 
+Parallelising `map_snps_to_genes` across too many threads actually seems to slow everything down, despite having sufficient memory.
+
+This might be because:
+
+1. They are all calling to the same underlying MAGMA C code.
+2. **They are reserving more memory in C than the computer thinks is available.** (seems likely)
+3. They are all reading from the same reference files (e.g. 1KG).
+4. MAGMA is somehow already parallelising processes internally. 
+5. Docker is launching some processes that don't get killed when restarting the container.
+6. Intermediate MAGMA files are getting repeatedly appended and causing problems in subsequent reruns.
+7. `genes_only=FALSE`? but this should make things faster, not slower...Indeed, setting `genes_only=TRUE` seems to increase time.
+8. Newer versions of MAGMA(v1.10) has bugs that causes everything to slow down.
+  - MAGMAv1.08 might be a bit faster, but hard to tell bc uses diff files each time. 
+  
+**Solution**:
+ 
+ Limit the number of parallel threads to <=20. This results in low memory usage (~11/252GB at any given time, indicated by the green bar in `htop`) but, perhaps importantly, ensures that the amount of memory being reserved only reaches ~2/3 of the max (the yellow bar in `htop`).
+
 ```{r}
 # gene_files <- list_snps_to_genes_files(save_dir = save_dir)
+# MAGMA.Celltyping::magma_install(desired_version = "1.08", upgrade = TRUE)
 
 t1 <- Sys.time()
 magma_files <- parallel::mclapply(seq_len(nrow(meta)),
@@ -187,8 +210,9 @@ magma_files <- parallel::mclapply(seq_len(nrow(meta)),
                                       meta$id[i]," -----") 
      tryCatch(expr = { 
        MAGMA.Celltyping::map_snps_to_genes(
+         # version = "1.08",
          path_formatted = meta$munged_path[i],
-         genome_build = meta$build_inferred[i],
+         genome_build = meta$build_final[i],
          N = if(is.na(meta$N[i])) NULL else meta$N[i],
          population = meta$population_1KG[i],
          upstream_kb = 35,  
@@ -197,7 +221,7 @@ magma_files <- parallel::mclapply(seq_len(nrow(meta)),
          force_new = FALSE
          )
      }, error = function(e) {EWCE:::message_parallel(e);NULL}) 
-}, mc.cores = min(nrow(meta),40) ) |> `names<-`(meta$id) 
+}, mc.cores = min(nrow(meta),20) ) |> `names<-`(meta$id) 
 t2 <- Sys.time()
 print(t2-t1)
 

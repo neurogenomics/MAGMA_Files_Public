@@ -106,7 +106,8 @@ add_file_links <- function(meta,
   messager("Adding GitHub download URLs for .genes.raw and .genes.out files.",
            v=verbose)
   # "https://github.com/neurogenomics/MAGMA_Files_Public/raw/master/data/MAGMA_Files/ukb-b-956.tsv.gz.35UP.10DOWN/ukb-b-956.tsv.gz.35UP.10DOWN.genes.out"
-  base_url <- paste("https://github.com",user,repo,"raw",branch,"data/MAGMA_Files",sep='/')
+  base_url <- paste("https://github.com",user,repo,"raw",branch,
+                    "data/MAGMA_Files",sep='/')
   if(is.null(gene_files)){
     gene_files <- list()
     gene_files[['genes.raw']] <- list_snps_to_genes_files(save_dir = data_dir, 
