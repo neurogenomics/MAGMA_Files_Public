@@ -75,7 +75,8 @@ gather_metadata <- function(save_dir,
   }
   #### Find which GWAS have different inferred genome builds #### 
   meta <- check_build_matches(meta = meta,
-                              default_build = default_build)
+                              default_build = default_build,
+                              verbose = verbose)
   #### Add GitHub download links to genes.raw and genes.out files #####
   meta <- add_file_links(meta = meta)
   #### Translate populations to match 1KG ref ####
@@ -84,6 +85,8 @@ gather_metadata <- function(save_dir,
   #### Add missing N #####
   meta <- add_sample_size(meta = meta,
                           N_dict = N_dict)
+  #### Add prefix ####
+  meta <- add_prefix(meta = meta) 
   #### Set key ####
   data.table::setkeyv(meta,"id")
   #### Save ####
@@ -174,13 +177,7 @@ check_build_matches <- function(meta,
                v=verbose)
       return(meta)
     } 
-  }  
-  #### Fill missing builds ####
-  na_pops <- is.na(meta$population)
-  if(sum(na_pops)>0){
-    message(formatC(sum(na_pops),big.mark = ",")," populations are NA.\n",
-            "These will be filled with the default_build: ",default_build)
-  }
+  }   
   #### Compare build to build_inferred ####
   meta <- meta |>
     dplyr::mutate(build_matches = (toupper(
@@ -191,12 +188,18 @@ check_build_matches <- function(meta,
   messager(sum(meta$build_matches,na.rm = TRUE),"/",nrow(meta),
           "inferred genome builds match the reported genome build.",
           v=verbose) 
-  #### Fill builds where build_inferred is not available ####
-  meta$build_matches 
+  #### Fill builds where build_inferred is not available #### 
   meta <- dplyr::mutate(
     meta, 
     build_final = dplyr::coalesce(gsub("HG19/GRCh37","GRCH37",build), 
                                   build_inferred)) 
+  #### Finally, is build is still NA fill with defauld build ####
+  na_builds <- which(is.na(meta$build_final))
+  if(sum(na_builds)>0){
+    message(formatC(length(na_builds),big.mark = ",")," build_final are NA.\n",
+            "These will be filled with the default_build: ",default_build)
+    meta[na_builds,]$build_final <- default_build
+  }
   return(meta)
 }
 
@@ -318,34 +321,52 @@ list_snps_to_genes_files <- function(save_dir,
 #' 
 #' @keywords internal 
 copy_snps_to_genes_files <- function(search_dir,
-                                     pattern = "*.genes.out$|*.genes.raw$",
+                                     genes_out = TRUE,
+                                     genes_raw = TRUE,
+                                     log = TRUE,
+                                     log_suppl = TRUE, 
                                      save_dir = "MAGMA_Files",
-                                     overwrite = FALSE){
+                                     overwrite = FALSE,
+                                     nCores = 1){
   requireNamespace("parallel")
-  gene_files <- list_snps_to_genes_files(save_dir = search_dir, 
-                                         pattern = pattern)
-  gene_files2 <- parallel::mclapply(gene_files, function(x){
-    message_parallel(basename(x))
-    new_file <- file.path(save_dir,
-                          basename(dirname(x)),
-                          basename(x))
-    if(file.exists(new_file) && overwrite == FALSE){
-      message_parallel("Skipping: File already exists.")
-      return(new_file)
-    } else {
-      dir.create(dirname(new_file),
-                 showWarnings = FALSE, recursive = TRUE)
-      file.copy(x, new_file, overwrite = overwrite)
-    }
-    return(new_file)
+  
+  pattern_dict <- c(genes_out="*.genes.out$",
+                    genes_raw="*.genes.raw$",
+                    log="*.log$",
+                    log_suppl="*.log.suppl$")
+  opts_dict <- c(genes_out=genes_out,
+                 genes_raw=genes_raw,
+                 log=log,
+                 log_suppl=log_suppl)
+  pattern_dict <- pattern_dict[opts_dict[names(pattern_dict)]] 
+  files <- mapply(pattern_dict, 
+                  SIMPLIFY = FALSE,
+                  FUN=function(pattern){
+    list_snps_to_genes_files(save_dir = search_dir, 
+                             pattern = pattern)
   })
-  #### Separate .raw and .out files ####
-  genes.raw <- gene_files2[
-    unlist(lapply(gene_files2,function(x){endsWith(x,suffix = ".genes.raw")}))]
-  genes.out <- gene_files2[
-    unlist(lapply(gene_files2,function(x){endsWith(x,suffix = ".genes.out")}))]
-  return(list(genes.raw = genes.raw, 
-              genes.out = genes.out))
+
+  files_new <- mapply(files, 
+                      SIMPLIFY = FALSE,
+                      FUN=function(files_subset){
+    parallel::mclapply(files_subset, 
+                       function(x){
+                         message_parallel(basename(x))
+                         new_file <- file.path(save_dir,
+                                               basename(dirname(x)),
+                                               basename(x))
+                         if(file.exists(new_file) && overwrite == FALSE){
+                           message_parallel("Skipping: File already exists.")
+                           return(new_file)
+                         } else {
+                           dir.create(dirname(new_file),
+                                      showWarnings = FALSE, recursive = TRUE)
+                           file.copy(x, new_file, overwrite = overwrite)
+                         }
+                         return(new_file)
+     }, mc.cores = nCores)
+  })
+  return(files_new)
 }
 
 #' Translate subpopulations
@@ -405,6 +426,11 @@ add_sample_size <- function(meta,
     data.table::setkeyv(meta,"id")
     meta[na_ids,]$N <- N_dict_filled[na_ids]
   }
+  return(meta)
+}
+
+add_prefix <- function(meta){
+  meta$prefix <- stringr::str_split(meta$id,"[.]|-|_",simplify = TRUE)[,1] 
   return(meta)
 }
 

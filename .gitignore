@@ -1,6 +1,7 @@
 # Large files
 data/GWAS_sumstats
 data/VCFs
+data/merged
 
 # History files
 .Rhistory

@@ -134,15 +134,7 @@ subdirectory for its respective log files.
 - Seems to trace back to `read_vcf_parallel` step.
 - Restarting the Docker container and/or decreasing the number of threads to 30 seems to resolve this.
   + This suggests that perhaps the issue is breaking the VCFs into too small of chunks when the VCF is already small leads to situations where some chunks are empty, causing an error when being merged with all the other chunks. 
-  
-* Problematic IDS: 
-  - *ieu-a-1183*: 1,2,3
-  - *met-b-268*: 1,2,3 
-  - *ieu-a-1043*: 1,2,3
-  - *ieu-a-44*: 1,2,3
-  - *ieu-a-802*: 1,2,3
-  - *ieu-a-806*: 1,2,3
- 
+   
 ```{r}
 # munged_files <- list_sumstats(save_dir = save_dir)
 #### First, let's remove incomplete files.  ####
@@ -215,7 +207,7 @@ magma_files <- parallel::mclapply(seq_len(nrow(meta)),
          genome_build = meta$build_final[i],
          N = if(is.na(meta$N[i])) NULL else meta$N[i],
          population = meta$population_1KG[i],
-         upstream_kb = 35,  
+         upstream_kb = 35,
          downstream_kb = 10,
          genes_only = TRUE, 
          force_new = FALSE
@@ -254,21 +246,7 @@ We will also add a URL that can be used to download the files.
 meta <- gather_metadata(save_dir = save_dir)
 ```
 
-
-# Construct gene x trait matrix
-
-Can construct gene x trait matrix from gene-level MAGMA results 
-across multiple GWAS traits.
-
-```R
-magma_matrix <- phenomix::gene_trait_matrix(magma_files = magma_files,
-                                            metric = "ADJ_ZSTAT", 
-                                            save_path = file.path(save_dir,"OpenGWAS_neurodegenGWAS_ADJZSTAT.rds"),
-                                            mc.cores = 10) 
-```
-
-<hr> 
-
+ 
 # Session Info
 
 <details>
@@ -279,4 +257,4 @@ utils::sessionInfo()
 
 </details>
 
-<br>
+<hr>

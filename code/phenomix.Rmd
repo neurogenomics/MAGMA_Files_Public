@@ -1,0 +1,149 @@
+---
+title: "phenomix"
+author: "<h4>Author: <i>Brian M. Schilder</i></h4>"
+date: "<h4>Updated: <i>`r format( Sys.Date(), '%b-%d-%Y')`</i></h4>"
+output:
+  BiocStyle::html_document:
+vignette: >
+    %\VignetteIndexEntry{OpenGWAS} 
+    %\usepackage[utf8]{inputenc}
+    %\VignetteEngine{knitr::rmarkdown}
+---
+
+
+```{r setup, include=TRUE}  
+source(here::here("code/utils.R")) 
+save_dir <- here::here("data/GWAS_sumstats")
+```
+
+# Gather metdaata 
+
+```{r}
+meta <- gather_metadata(save_dir = save_dir)
+```
+
+# SNP x trait matrix
+
+## Get features counts
+
+```{r}
+files <- stats::setNames(meta$munged_path,
+                         meta$id)
+chunksize <- 20
+files_chunked <- split(files, ceiling(seq_along(files)/chunksize))
+
+feature_counts <- lapply(files_chunked, 
+                         function(fc){
+  features <- parallel::mcmapply(
+         fc, 
+         SIMPLIFY = FALSE,
+         FUN = function(f){
+      message_parallel(basename(f))
+      tryCatch({
+        data.table::fread(f, select = c("SNP"))
+      }, error=function(e){message_parallel(e);NULL})
+  }, mc.cores = chunksize) |> data.table::rbindlist() 
+  features_agg <- features[,.(n=.N), by=SNP]  
+  return(features_agg)
+}) |> data.table::rbindlist() 
+feature_counts <- feature_counts[,.(n=sum(n)), by=SNP] 
+```
+
+
+# Gene x trait matrix
+
+Can construct gene x trait matrix from gene-level MAGMA results 
+across multiple GWAS traits.
+
+```{r}
+magma_files <- MAGMA.Celltyping::list_snps_to_genes_files(save_dir = save_dir)
+
+magma_matrix <- phenomix::gwas_matrix_magma(magma_files = magma_files,
+                                            metric = "ADJ_ZSTAT",  
+                                            nCores = 30) 
+```
+
+## Process `Seurat` object 
+
+```{r}
+obj <- Seurat::CreateSeuratObject(counts = Seurat::CreateAssayObject(data = magma_matrix), 
+                                  project = "OpenGWAS",
+                                  meta.data = data.frame(meta, 
+                                                     row.names = gsub("-|[.]","_",meta$id)), 
+                                  assay = "genes")
+obj <- Seurat::FindVariableFeatures(obj, nfeatures = 2000)
+obj <- Seurat::ScaleData(obj, 
+                         vars.to.regress = c("N","population_1KG","prefix"), 
+                         features = rownames(obj))
+obj <- Seurat::RunPCA(obj,
+                      features = rownames(obj))
+obj <- Seurat::FindNeighbors(obj)
+obj <- Seurat::RunUMAP(obj, dims = 1:50,
+                       n.components = 2)
+obj <- Seurat::FindNeighbors(obj, 
+                             # reduction = "umap", 
+                             dims = 1:2)
+obj <- Seurat::FindClusters(obj, reduction = "umap")
+Seurat::DimPlot(obj, 
+                group.by = c("seurat_clusters","category","population_1KG","prefix"))  
+```
+
+### Save RDS
+
+```{r}
+saveRDS(obj, file = here::here("data/merged","533GWAS_ADJZSTAT_seurat.rds"))
+```
+
+
+## Run `variancePartition`
+
+Identify metadata variables that significantly influence the data.
+*WARNING*: Takes a long time. 
+
+```{r, eval=FALSE}
+# varPart <- phenomix::run_variancePartition(
+#   obj = obj, 
+#   formula = "~ N + nsnp + category + year + population_1KG +  prefix")
+```
+
+
+## Run TF-IDF
+
+Annotate clusters based on sample descriptions. 
+
+```{r}
+res_tfidf <- scNLP::plot_tfidf(obj,
+                               label_var = "trait",
+                               size_var = "N",
+                               color_var = "subcategory",
+                               # interact = TRUE, 
+                               year = "year",
+                               nsnp = "nsnp",
+                               category = "category",
+                               subcategory = "subcategory"
+                               )
+```
+
+## Run `MOFA2` 
+
+```{r}
+mofa_res <- phenomix::run_mofa2(obj = obj,
+                                metadata_idcol = "id")
+```
+
+
+
+
+ 
+# Session Info
+
+<details>
+
+```{r}
+utils::sessionInfo()
+```
+
+</details>
+
+<hr>
+

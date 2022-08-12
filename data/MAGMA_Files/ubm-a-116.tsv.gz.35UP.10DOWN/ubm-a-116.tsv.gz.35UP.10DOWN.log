@@ -1,0 +1,36 @@
+Welcome to MAGMA v1.10 (linux)
+Using flags:
+	--bfile /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur
+	--pval /tmp/Rtmp3yqmVv/ubm-a-116.tsv N=8427
+	--genes-only
+	--gene-annot /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ubm-a-116/MAGMA_Files/ubm-a-116.tsv.gz.35UP.10DOWN/ubm-a-116.tsv.gz.35UP.10DOWN.genes.annot
+	--out /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ubm-a-116/MAGMA_Files/ubm-a-116.tsv.gz.35UP.10DOWN/ubm-a-116.tsv.gz.35UP.10DOWN
+
+Start time is 18:37:26, Saturday 06 Aug 2022
+
+Loading PLINK-format data...
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.fam... 503 individuals read
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bim... 22665064 SNPs read
+Preparing file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bed... 
+
+Reading SNP synonyms from file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.synonyms (auto-detected)
+	read 6016767 mapped synonyms from file, mapping to 3921040 SNPs in the data
+	WARNING: detected 133 synonymous SNP pairs in the data
+	         skipped all synonym entries involved, synonymous SNPs are kept in analysis
+	         writing list of detected synonyms in data to supplementary log file
+Reading SNP p-values from file /tmp/Rtmp3yqmVv/ubm-a-116.tsv... 
+	detected 12 variables in file
+	using variable: SNP (SNP id)
+	using variable: P (p-value)
+	read 7170096 lines from file, containing valid SNP p-values for 6721876 SNPs in data (93.75% of lines, 29.66% of SNPs in data)
+Loading gene annotation from file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ubm-a-116/MAGMA_Files/ubm-a-116.tsv.gz.35UP.10DOWN/ubm-a-116.tsv.gz.35UP.10DOWN.genes.annot... 
+	18230 gene definitions read from file
+	found 18191 genes containing valid SNPs in genotype data
+
+
+Starting gene analysis... 
+	using model: SNPwise-mean
+	writing gene analysis results to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ubm-a-116/MAGMA_Files/ubm-a-116.tsv.gz.35UP.10DOWN/ubm-a-116.tsv.gz.35UP.10DOWN.genes.out
+
+
+End time is 22:59:54, Sunday 07 Aug 2022 (elapsed: 28:22:28)

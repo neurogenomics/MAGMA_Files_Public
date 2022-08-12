@@ -1,0 +1,36 @@
+Welcome to MAGMA v1.10 (linux)
+Using flags:
+	--bfile /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur
+	--pval /tmp/RtmpSxaIPX/Vuckovic2020.mcv.tsv N=408112
+	--gene-annot /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/Vuckovic2020.mcv/MAGMA_Files/Vuckovic2020.mcv.tsv.gz.35UP.10DOWN/Vuckovic2020.mcv.tsv.gz.35UP.10DOWN.genes.annot
+	--out /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/Vuckovic2020.mcv/MAGMA_Files/Vuckovic2020.mcv.tsv.gz.35UP.10DOWN/Vuckovic2020.mcv.tsv.gz.35UP.10DOWN
+
+Start time is 10:40:31, Thursday 28 Jul 2022
+
+Loading PLINK-format data...
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.fam... 503 individuals read
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bim... 22665064 SNPs read
+Preparing file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bed... 
+
+Reading SNP synonyms from file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.synonyms (auto-detected)
+	read 6016767 mapped synonyms from file, mapping to 3921040 SNPs in the data
+	WARNING: detected 133 synonymous SNP pairs in the data
+	         skipped all synonym entries involved, synonymous SNPs are kept in analysis
+	         writing list of detected synonyms in data to supplementary log file
+Reading SNP p-values from file /tmp/RtmpSxaIPX/Vuckovic2020.mcv.tsv... 
+	detected 17 variables in file
+	using variable: SNP (SNP id)
+	using variable: P (p-value)
+	read 8001677 lines from file, containing valid SNP p-values for 6293709 SNPs in data (78.65% of lines, 27.77% of SNPs in data)
+Loading gene annotation from file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/Vuckovic2020.mcv/MAGMA_Files/Vuckovic2020.mcv.tsv.gz.35UP.10DOWN/Vuckovic2020.mcv.tsv.gz.35UP.10DOWN.genes.annot... 
+	18161 gene definitions read from file
+	found 18146 genes containing valid SNPs in genotype data
+
+
+Starting gene analysis... 
+	using model: SNPwise-mean
+	writing gene analysis results to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/Vuckovic2020.mcv/MAGMA_Files/Vuckovic2020.mcv.tsv.gz.35UP.10DOWN/Vuckovic2020.mcv.tsv.gz.35UP.10DOWN.genes.out
+	writing intermediate output to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/Vuckovic2020.mcv/MAGMA_Files/Vuckovic2020.mcv.tsv.gz.35UP.10DOWN/Vuckovic2020.mcv.tsv.gz.35UP.10DOWN.genes.raw
+
+
+End time is 15:58:11, Thursday 28 Jul 2022 (elapsed: 05:17:40)

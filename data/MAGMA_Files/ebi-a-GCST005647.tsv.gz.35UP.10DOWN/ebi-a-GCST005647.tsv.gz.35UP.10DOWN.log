@@ -1,0 +1,36 @@
+Welcome to MAGMA v1.10 (linux)
+Using flags:
+	--bfile /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur
+	--pval /home/rstudio/.cache/R/MAGMA.Celltyping/ebi-a-GCST005647.tsv N=80610
+	--genes-only
+	--gene-annot /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ebi-a-GCST005647/MAGMA_Files/ebi-a-GCST005647.tsv.gz.35UP.10DOWN/ebi-a-GCST005647.tsv.gz.35UP.10DOWN.genes.annot
+	--out /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ebi-a-GCST005647/MAGMA_Files/ebi-a-GCST005647.tsv.gz.35UP.10DOWN/ebi-a-GCST005647.tsv.gz.35UP.10DOWN
+
+Start time is 04:02:46, Sunday 31 Jul 2022
+
+Loading PLINK-format data...
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.fam... 503 individuals read
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bim... 22665064 SNPs read
+Preparing file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bed... 
+
+Reading SNP synonyms from file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.synonyms (auto-detected)
+	read 6016767 mapped synonyms from file, mapping to 3921040 SNPs in the data
+	WARNING: detected 133 synonymous SNP pairs in the data
+	         skipped all synonym entries involved, synonymous SNPs are kept in analysis
+	         writing list of detected synonyms in data to supplementary log file
+Reading SNP p-values from file /home/rstudio/.cache/R/MAGMA.Celltyping/ebi-a-GCST005647.tsv... 
+	detected 12 variables in file
+	using variable: SNP (SNP id)
+	using variable: P (p-value)
+	read 4677853 lines from file, containing valid SNP p-values for 4599404 SNPs in data (98.32% of lines, 20.29% of SNPs in data)
+Loading gene annotation from file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ebi-a-GCST005647/MAGMA_Files/ebi-a-GCST005647.tsv.gz.35UP.10DOWN/ebi-a-GCST005647.tsv.gz.35UP.10DOWN.genes.annot... 
+	18234 gene definitions read from file
+	found 18187 genes containing valid SNPs in genotype data
+
+
+Starting gene analysis... 
+	using model: SNPwise-mean
+	writing gene analysis results to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ebi-a-GCST005647/MAGMA_Files/ebi-a-GCST005647.tsv.gz.35UP.10DOWN/ebi-a-GCST005647.tsv.gz.35UP.10DOWN.genes.out
+
+
+End time is 04:05:09, Sunday 31 Jul 2022 (elapsed: 00:02:23)

@@ -1,0 +1,36 @@
+Welcome to MAGMA v1.10 (linux)
+Using flags:
+	--bfile /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur
+	--pval /home/rstudio/.cache/R/MAGMA.Celltyping/ukb-a-15.tsv N=336082
+	--genes-only
+	--gene-annot /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ukb-a-15/MAGMA_Files/ukb-a-15.tsv.gz.35UP.10DOWN/ukb-a-15.tsv.gz.35UP.10DOWN.genes.annot
+	--out /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ukb-a-15/MAGMA_Files/ukb-a-15.tsv.gz.35UP.10DOWN/ukb-a-15.tsv.gz.35UP.10DOWN
+
+Start time is 04:07:49, Sunday 31 Jul 2022
+
+Loading PLINK-format data...
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.fam... 503 individuals read
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bim... 22665064 SNPs read
+Preparing file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bed... 
+
+Reading SNP synonyms from file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.synonyms (auto-detected)
+	read 6016767 mapped synonyms from file, mapping to 3921040 SNPs in the data
+	WARNING: detected 133 synonymous SNP pairs in the data
+	         skipped all synonym entries involved, synonymous SNPs are kept in analysis
+	         writing list of detected synonyms in data to supplementary log file
+Reading SNP p-values from file /home/rstudio/.cache/R/MAGMA.Celltyping/ukb-a-15.tsv... 
+	detected 13 variables in file
+	using variable: SNP (SNP id)
+	using variable: P (p-value)
+	read 6342070 lines from file, containing valid SNP p-values for 6213261 SNPs in data (97.97% of lines, 27.41% of SNPs in data)
+Loading gene annotation from file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ukb-a-15/MAGMA_Files/ukb-a-15.tsv.gz.35UP.10DOWN/ukb-a-15.tsv.gz.35UP.10DOWN.genes.annot... 
+	18041 gene definitions read from file
+	found 18039 genes containing valid SNPs in genotype data
+
+
+Starting gene analysis... 
+	using model: SNPwise-mean
+	writing gene analysis results to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ukb-a-15/MAGMA_Files/ukb-a-15.tsv.gz.35UP.10DOWN/ukb-a-15.tsv.gz.35UP.10DOWN.genes.out
+
+
+End time is 04:13:04, Sunday 31 Jul 2022 (elapsed: 00:05:15)

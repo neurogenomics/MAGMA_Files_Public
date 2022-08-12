@@ -1,0 +1,36 @@
+Welcome to MAGMA v1.10 (linux)
+Using flags:
+	--bfile /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur
+	--pval /home/rstudio/.cache/R/MAGMA.Celltyping/ukb-b-323.tsv N=399793
+	--genes-only
+	--gene-annot /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ukb-b-323/MAGMA_Files/ukb-b-323.tsv.gz.35UP.10DOWN/ukb-b-323.tsv.gz.35UP.10DOWN.genes.annot
+	--out /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ukb-b-323/MAGMA_Files/ukb-b-323.tsv.gz.35UP.10DOWN/ukb-b-323.tsv.gz.35UP.10DOWN
+
+Start time is 05:23:05, Sunday 31 Jul 2022
+
+Loading PLINK-format data...
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.fam... 503 individuals read
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bim... 22665064 SNPs read
+Preparing file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bed... 
+
+Reading SNP synonyms from file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.synonyms (auto-detected)
+	read 6016767 mapped synonyms from file, mapping to 3921040 SNPs in the data
+	WARNING: detected 133 synonymous SNP pairs in the data
+	         skipped all synonym entries involved, synonymous SNPs are kept in analysis
+	         writing list of detected synonyms in data to supplementary log file
+Reading SNP p-values from file /home/rstudio/.cache/R/MAGMA.Celltyping/ukb-b-323.tsv... 
+	detected 12 variables in file
+	using variable: SNP (SNP id)
+	using variable: P (p-value)
+	read 3619060 lines from file, containing valid SNP p-values for 3603664 SNPs in data (99.57% of lines, 15.9% of SNPs in data)
+Loading gene annotation from file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ukb-b-323/MAGMA_Files/ukb-b-323.tsv.gz.35UP.10DOWN/ukb-b-323.tsv.gz.35UP.10DOWN.genes.annot... 
+	18185 gene definitions read from file
+	found 18141 genes containing valid SNPs in genotype data
+
+
+Starting gene analysis... 
+	using model: SNPwise-mean
+	writing gene analysis results to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/ukb-b-323/MAGMA_Files/ukb-b-323.tsv.gz.35UP.10DOWN/ukb-b-323.tsv.gz.35UP.10DOWN.genes.out
+
+
+End time is 05:26:00, Sunday 31 Jul 2022 (elapsed: 00:02:55)
