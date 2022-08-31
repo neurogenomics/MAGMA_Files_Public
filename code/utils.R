@@ -147,6 +147,8 @@ add_file_links <- function(meta,
   if(!include_local_paths){
     meta <- meta |> dplyr::select(-genes_raw_path, -genes_out_path)
   }
+  meta <- meta[munged_path!="",]
+  data.table::setkey(meta,id)
   return(meta)
 }
 

@@ -166,8 +166,7 @@ gwas_paths <- MungeSumstats::import_sumstats(
 ```{r}
 meta <- gather_metadata(save_dir = save_dir,
                         N_dict=c("Wightman2021"=1126563, 
-                                 "Vuckovic2020"=408112))
-data.table::setkey(meta,id)
+                                 "Vuckovic2020"=408112)) 
 ```
 
 # Map SNPs to genes  
