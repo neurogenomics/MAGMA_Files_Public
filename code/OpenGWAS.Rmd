@@ -119,21 +119,20 @@ subdirectory for its respective log files.
 
 ## OpenGWAS
 
-**Error description**:
-1. `BiocParallel errors
+### Errors
+
+#### Error 1
+- `BiocParallel errors
   0 remote errors, element index: 
   50 unevaluated and other errors
   first remote error:`
-2. No sumstats produced.
-3. Also recorded messages from the wrong/next id!
+- No sumstats produced.
+- Also recorded messages from the wrong/next id!
 
-
-- Seems to occurs with smaller files, <2M variants.
-- VCF and tabix index download fine (checked file sizes against manual download from OpenGWAS).
-- Only using ~half of available memory at most, so doesn't seem to be crashing due to that.
-- Seems to trace back to `read_vcf_parallel` step.
-- Restarting the Docker container and/or decreasing the number of threads to 30 seems to resolve this.
-  + This suggests that perhaps the issue is breaking the VCFs into too small of chunks when the VCF is already small leads to situations where some chunks are empty, causing an error when being merged with all the other chunks. 
+#### Error 2
+- ukb-a-367
+-  `[E::bgzf_read_block] Failed to read BGZF block data at offset 247839653 expected 17773 bytes; hread returned 683`
+ 
    
 ```{r}
 # munged_files <- list_sumstats(save_dir = save_dir)
