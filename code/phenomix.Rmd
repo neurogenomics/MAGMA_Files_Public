@@ -13,13 +13,15 @@ vignette: >
 
 ```{r setup, include=TRUE}  
 source(here::here("code/utils.R")) 
-save_dir <- here::here("data/GWAS_sumstats")
+# save_dir <- here::here("data/GWAS_sumstats")
+save_dir <- "/home/bms20/RDS/project/neurogenomics-lab/ephemeral/Data/MAGMA_Files_Public/data/GWAS_sumstats/"
 ```
 
 # Gather metdaata 
 
 ```{r}
-meta <- gather_metadata(save_dir = save_dir)
+meta <- gather_metadata(save_dir = save_dir,
+                         pattern = "*.tsv.bgz$")
 ```
 
 # SNP x trait matrix

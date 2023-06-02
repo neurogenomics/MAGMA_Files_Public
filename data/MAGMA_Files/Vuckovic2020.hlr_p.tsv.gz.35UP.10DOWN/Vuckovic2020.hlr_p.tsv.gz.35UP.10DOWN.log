@@ -1,11 +1,11 @@
 Welcome to MAGMA v1.10 (linux)
 Using flags:
 	--bfile /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur
-	--pval /tmp/RtmpSxaIPX/Vuckovic2020.hlr_p.tsv N=408112
-	--gene-annot /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/Vuckovic2020.hlr_p/MAGMA_Files/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN.genes.annot
-	--out /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/Vuckovic2020.hlr_p/MAGMA_Files/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN
+	--pval /tmp/RtmpbiUhmC/Vuckovic2020.hlr_p.tsv N=408112
+	--gene-annot /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Vuckovic2020.hlr_p/MAGMA_Files/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN.genes.annot
+	--out /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Vuckovic2020.hlr_p/MAGMA_Files/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN
 
-Start time is 10:40:32, Thursday 28 Jul 2022
+Start time is 13:40:59, Thursday 01 Jun 2023
 
 Loading PLINK-format data...
 Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.fam... 503 individuals read
@@ -17,20 +17,23 @@ Reading SNP synonyms from file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur
 	WARNING: detected 133 synonymous SNP pairs in the data
 	         skipped all synonym entries involved, synonymous SNPs are kept in analysis
 	         writing list of detected synonyms in data to supplementary log file
-Reading SNP p-values from file /tmp/RtmpSxaIPX/Vuckovic2020.hlr_p.tsv... 
+Reading SNP p-values from file /tmp/RtmpbiUhmC/Vuckovic2020.hlr_p.tsv... 
 	detected 17 variables in file
 	using variable: SNP (SNP id)
 	using variable: P (p-value)
-	read 8001741 lines from file, containing valid SNP p-values for 6293840 SNPs in data (78.66% of lines, 27.77% of SNPs in data)
-Loading gene annotation from file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/Vuckovic2020.hlr_p/MAGMA_Files/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN.genes.annot... 
-	18161 gene definitions read from file
-	found 18146 genes containing valid SNPs in genotype data
+	read 12706061 lines from file, containing valid SNP p-values for 10472494 SNPs in data (82.42% of lines, 46.21% of SNPs in data)
+	WARNING: file contained 2 SNPs (same IDs or synonyms) with duplications
+	         dropped all occurrences of each from analysis
+	         writing list of duplicated IDs to supplementary log file
+Loading gene annotation from file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Vuckovic2020.hlr_p/MAGMA_Files/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN.genes.annot... 
+	18167 gene definitions read from file
+	found 18157 genes containing valid SNPs in genotype data
 
 
 Starting gene analysis... 
 	using model: SNPwise-mean
-	writing gene analysis results to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/Vuckovic2020.hlr_p/MAGMA_Files/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN.genes.out
-	writing intermediate output to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_sumstats/Vuckovic2020.hlr_p/MAGMA_Files/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN.genes.raw
+	writing gene analysis results to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Vuckovic2020.hlr_p/MAGMA_Files/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN.genes.out
+	writing intermediate output to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Vuckovic2020.hlr_p/MAGMA_Files/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN/Vuckovic2020.hlr_p.tsv.gz.35UP.10DOWN.genes.raw
 
 
-End time is 15:22:16, Thursday 28 Jul 2022 (elapsed: 04:41:44)
+End time is 16:39:30, Thursday 01 Jun 2023 (elapsed: 02:58:31)

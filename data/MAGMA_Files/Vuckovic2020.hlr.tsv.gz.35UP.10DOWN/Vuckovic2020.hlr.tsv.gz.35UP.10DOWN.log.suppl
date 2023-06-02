@@ -137,3 +137,10 @@ rs367841254	rs374484056
 rs60712651	rs114457163
 rs3098019	rs76185201
 rs73541461	rs587759063
+
+##### #####  SNP p-value file  ##### #####
+# Following SNPs had duplications entries in file /tmp/RtmpbiUhmC/Vuckovic2020.hlr.tsv
+# Duplicates may have been synonyms; listing all synonymous IDs in data for SNP on each line
+# All occurrences were dropped from analysis
+rs782295160	rs587708365
+rs578181086

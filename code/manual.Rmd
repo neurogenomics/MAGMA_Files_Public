@@ -1,5 +1,5 @@
 ---
-title: "Vuckovic2020"
+title: "Manual GWAS"
 author: "<h4>Author: <i>Brian M. Schilder</i></h4>"
 date: "<h4>Updated: <i>`r format( Sys.Date(), '%b-%d-%Y')`</i></h4>"
 output:
@@ -13,9 +13,17 @@ vignette: >
 ```{r setup, include=TRUE}
 knitr::opts_chunk$set(echo = TRUE)
 
-save_dir <- here::here("data/GWAS_sumstats")
-source(here::here("code/utils.R"))
+save_dir <- here::here("data","GWAS_munged")
+source(here::here("code","utils.R"))
 ```
+
+## Install deps 
+
+```{r}
+if(!require("MungeSumstats")) remotes::install_github("neurogenomics/MungeSumstats",dependencies = TRUE)
+if(!require("downloadR")) remotes::install_github("RajLabMSSM/downloadR")
+```
+
 
 # Wightman2021 
 
@@ -37,12 +45,13 @@ id <- "Wightman2021"
 # unlink(list.dirs(here::here("data/GWAS_sumstats",id,"logs")), recursive = T)
 gwas_paths <- MungeSumstats::format_sumstats(
   path = tmp,
-  save_path = here::here("data/GWAS_sumstats",id,paste0(id,".tsv.gz")),
+  save_path = here::here(save_dir,id,paste0(id,".tsv.gz")),
   ref_genome = "GRCh37",
+  dbSNP = 144,
   nThread = 40,
   force_new = FALSE,
   #### Record logs  
-  log_folder = here::here("data/GWAS_sumstats",id,"logs"),
+  log_folder = here::here(save_dir,id,"logs"),
   log_folder_ind = TRUE,
   log_mungesumstats_msgs = TRUE, 
   mapping_file = mapping_file) 
@@ -62,8 +71,7 @@ magma_files <- parallel::mclapply(sumstats,
      tryCatch(expr = {
        MAGMA.Celltyping::map_snps_to_genes(
          path_formatted = x,
-         genome_build = "GRCH37", 
-         N = 1126563,
+         genome_build = "GRCH37",  
          population = "EUR",
          upstream_kb = 35,  
          downstream_kb = 10, 
@@ -83,32 +91,71 @@ Generate weighted gene lists for each blood trait GWAS from:
 Data source: 
 - [UK Biobank subset](ftp://ftp.sanger.ac.uk/pub/project/humgen/summary_statistics/UKBB_blood_cell_traits/): 
 - [Meta-analyses (link broken)](http://www.mhi-humangenetics.org/en/resources): 746,667 subjects across 5 ancestries.
+- [Trait metadata key](https://www.cell.com/cms/10.1016/j.cell.2020.08.008/attachment/ab993af6-e2f4-4681-9308-30aaa50d3953/mmc1.xlsx)
 
 Below, we analyse only the UK Biobank subset of the results, as the link to the full meta-analyses are now broken. 
 
-## List raw files 
+```{r}   
+## Get abbrev-to-trait mapping file
+trait_map <- readxl::read_xlsx(here::here("code/Vuckovic2020_mmc1.xlsx"), 
+                               skip = 2) |>
+  data.table::data.table(check.names = TRUE) |> 
+  tidyr::fill(`Cell.Type`) |>
+  dplyr::mutate(file_abbreviation=tolower(
+    gsub("RDW","rdw_cv",
+    gsub("[%]","_p",
+         gsub("#","",Standard.Abbreviation))
+    )
+    )
+  )
+## List all files on FTP server ####
+result <- (
+  RCurl::getURL("ftp://ftp.sanger.ac.uk/pub/project/humgen/summary_statistics/UKBB_blood_cell_traits/",
+                        verbose=TRUE,
+                        ftp.use.epsv=TRUE,
+                        dirlistonly = TRUE) |> 
+  strsplit(split = "\r*\n")
+)[[1]] 
+## Remove readme file
+result <- result[result!="nohup.out"]
+## Merge metadata
+ftp_files <- data.table::data.table(
+  file_abbreviation=gsub("\\.assoc$","",result),
+  link=paste0("ftp://ftp.sanger.ac.uk/pub/project/humgen/summary_statistics/UKBB_blood_cell_traits/",result)
+) |> merge(trait_map,by="file_abbreviation", all.x=TRUE)
+# ftp_files[is.na(Long.Name)]
+```
+
+## Download raw files 
  
 ```{r}
-files <- list.files("/home/bms20/RDS/project/neurogenomics-lab/live/Data/GWAS_sumstats/Original/Bloodtraits_Vuckovic_2020", full.names = TRUE)
-names(files) <- gsub("\\.assoc","", basename(files))
+files <- downloadR::downloader(input_url = ftp_files$link, 
+                      output_path = file.path(here::here("data/GWAS_raw"),
+                                              paste0("Vuckovic2020.",
+                                                     gsub("\\.assoc","",
+                                                          basename(ftp_files$link))
+                                                     )
+                                              )
+                      ) 
+names(files) <- basename(files)
 ```
 
 ## Munge summary stats
 
 ```{r}
-files_munged <- mapply(files, 
-                       SIMPLIFY = FALSE, 
-                       FUN = function(f){
-  message("Processing: ",basename(f))
-  nm <- paste0("Vuckovic2020.",gsub("\\.assoc","",basename(f)))
-  save_dir <- here::here("data/GWAS_sumstats",nm)
+files_munged <- lapply(names(files),  
+                       function(nm){
+  message("Processing: ",basename(nm)) 
+  save_dir <- here::here("data/GWAS_munged",nm)
   MungeSumstats::format_sumstats(
-    path = f, 
+    path = files[[nm]], 
     save_path = file.path(save_dir,paste0(nm,".tsv.gz")),
+    dbSNP = 144,
+    bi_allelic_filter = TRUE,
     log_folder = file.path(save_dir,"logs"),
     log_folder_ind = TRUE,
     log_mungesumstats_msgs = TRUE,
-    nThread = 30
+    nThread = 10
     )
 })
 ```
@@ -120,8 +167,7 @@ Unfortunately, per-SNP sample size is not included in any of the summary stats p
 ```{r}
 # gene_files <- list_snps_to_genes_files(save_dir = save_dir)
 sumstats <- MungeSumstats::list_sumstats(save_dir = save_dir,
-                                         pattern = "Vuckovic")
-
+                                         pattern = "Vuckovic") 
 t1 <- Sys.time()
 magma_files <- parallel::mclapply(sumstats,
                                   function(x){ 
@@ -140,7 +186,7 @@ magma_files <- parallel::mclapply(sumstats,
          force_new = FALSE
          )
      }, error = function(e) {message(e);NULL}) 
-}, mc.cores = min(length(sumstats),40) )
+}, mc.cores = min(length(sumstats),5) )
 t2 <- Sys.time()
 print(t2-t1)
 ```

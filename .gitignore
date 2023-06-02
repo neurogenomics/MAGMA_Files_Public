@@ -1,5 +1,7 @@
 # Large files
-data/GWAS_sumstats
+data/GWAS_munged
+data/GWAS_old
+data/GWAS_raw
 data/VCFs
 data/merged
 
