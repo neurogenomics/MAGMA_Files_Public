@@ -156,6 +156,7 @@ gwas_paths <- MungeSumstats::import_sumstats(
   nThread = 8, # >30 causes issues with read_vcf_parallel
   parallel_across_ids = FALSE,
   dbSNP = 144,
+  tabix_index = TRUE,
   force_new_vcf = FALSE,
   force_new = FALSE,
   vcf_download = TRUE,

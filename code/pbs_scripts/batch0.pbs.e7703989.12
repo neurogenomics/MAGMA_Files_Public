@@ -1,0 +1,53 @@
+Processing 1 datasets from Open GWAS.
+Using previously downloaded VCF.
+save_path suggests .gz output but tabix_index=TRUE Switching output to tabix-indexed format (.bgz).
+Formatted summary statistics will be saved to ==>  /rds/general/project/neurogenomics-lab/ephemeral/MAGMA_Files_Public/data/GWAS_munged/ukb-a-536/ukb-a-536.tsv.bgz
+Log data to be saved to ==>  /rds/general/project/neurogenomics-lab/ephemeral/MAGMA_Files_Public/data/GWAS_munged/ukb-a-536/logs
+Importing previously formatted file.Set `force_new=TRUE` to override this.
+    /rds/general/project/neurogenomics-lab/ephemeral/MAGMA_Files_Public/data/GWAS_munged/ukb-a-536/ukb-a-536.tsv.bgz
+Done munging in 0 minutes.
+Successfully finished preparing sumstats file, preview:
+Reading header.
+           SNP CHR     BP A1 A2    END FILTER      FRQ         BETA        LP
+1:  rs12238997   1 693731  A  G 693731   PASS 0.883074  7.18753e-05 0.0622876
+2: rs144155419   1 717587  G  A 717587   PASS 0.985614 -2.83877e-03 1.8739100
+3: rs148120343   1 730087  T  C 730087   PASS 0.944527  2.81481e-04 0.1963280
+4: rs141242758   1 734349  T  C 734349   PASS 0.878487  1.05614e-04 0.0998946
+5:  rs61770167   1 740284  C  T 740284   PASS 0.994144 -6.77546e-04 0.1465660
+            SE      N          P          Z
+1: 0.000427197 337199 0.86638794  0.1682483
+2: 0.001147530 337199 0.01336873 -2.4737927
+3: 0.000595276 337199 0.63631476  0.4728576
+4: 0.000405516 337199 0.79452104  0.2604444
+5: 0.001845810 337199 0.71356576 -0.3670714
+Returning path to saved data.
+
+ukb-a-536 : Done in 0.006 minutes.
+
+Done with all processing in 0.01 minutes.
+Warning message:
+In sink(NULL, type = "output") : no sink to remove
+===================== 🦠🌋🦠 Welcome to MAGMA.Celltyping 🦠🌋🦠 =====================
+This package uses MAGMA:
+https://ctg.cncr.nl/software/magma
+
+To cite MAGMA.Celltyping, please use:
+* Skene, N.G., Bryois, J., Bakken, T.E. et al. Genetic identification of
+     brain cell types underlying schizophrenia. Nat Genet 50, 825-833 (2018).
+     https://doi.org/10.1038/s41588-018-0129-5
+* de Leeuw CA, Mooij JM, Heskes T, Posthuma D (2015) MAGMA: Generalized
+     Gene-Set Analysis of GWAS Data. PLOS Computational Biology 11(4): e1004219.
+     https://doi.org/10.1371/journal.pcbi.1004219
+
+Please report any bugs or feature requests by filling out an Issues template:
+     https://github.com/neurogenomics/MAGMA_Celltyping/issues
+===================== 🦠🌋🦠 =========================== 🦠🌋🦠 =====================
+
+Installed MAGMA version: v1.10
+Skipping MAGMA installation.
+The desired_version of MAGMA is currently installed: v1.10
+Using: magma_v1.10
+Using existing genome_ref found in storage_dir.
+Error in path.expand(x) : invalid 'path' argument
+Calls: <Anonymous> -> fix_path -> path.expand
+Execution halted

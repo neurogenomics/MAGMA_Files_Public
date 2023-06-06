@@ -42,33 +42,14 @@ gwas_paths <- MungeSumstats::import_sumstats(
     log_folder_ind = TRUE,
     log_mungesumstats_msgs = TRUE
 )  
-
-
 #### Map ####
-magma_paths <- MAGMA.Celltyping::map_snps_to_genes(
-  path_formatted = gwas_paths$sumstats,
-  genome_build = "GRCH37",  
-  population = opt$population,
-  upstream_kb = 35,  
-  downstream_kb = 10, 
-  force_new = FALSE
-)
-# #### Remove temporary files ####
-# tmp_file <- file.path(root,"data","GWAS_munged",opt$id,paste0(opt$id,".tsv"))
-# if(file.exists(tmp_file)){
-#     #### Remove tsv if the compressed version also exists ####
-#     if(file.exists(gsub("\\.tsv",".bgz",tmp_file))){
-#         file.remove(tmp_file)
-#     }
-#     #### Remove vcf/index #####
-#     # vcf_file <- file.path(root,"data","VCFs",opt$id,paste0(opt$id,".vcf.gz"))
-#     # tbi_file <- paste0(vcf_file,".tbi")
-#     # if(file.exists(vcf_file)){
-#     #     file.remove(vcf_file)
-#     # }
-#     # if(file.exists(tbi_file)){
-#     #     file.remove(tbi_file)
-#     # }
-# }
-
-
+magma_paths <- lapply(gwas_paths, function(id){
+  MAGMA.Celltyping::map_snps_to_genes(
+    path_formatted = id$sumstats,
+    genome_build = "GRCH37",  
+    population = opt$population,
+    upstream_kb = 35,  
+    downstream_kb = 10, 
+    force_new = FALSE
+  )
+})
