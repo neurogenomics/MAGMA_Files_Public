@@ -35,9 +35,9 @@ gwas_paths <- MungeSumstats::import_sumstats(
     #### Filters ####
     dbSNP = 144,
     bi_allelic_filter = TRUE,
+    tabix_index = TRUE,
     compute_z = TRUE,
     force_new_z = TRUE,
-    tabix_index = TRUE,
     #### Record logs ####
     log_folder_ind = TRUE,
     log_mungesumstats_msgs = TRUE
