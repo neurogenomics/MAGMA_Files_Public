@@ -40,7 +40,7 @@ library(dplyr)
 
 source(here::here("code/utils.R"))
 
-save_dir <- here::here("data/GWAS_munged")
+save_dir <- here::here("data","GWAS_munged")
 dir.create(save_dir, showWarnings = FALSE, recursive = TRUE)
 ```
 
@@ -109,6 +109,7 @@ knitr::kable(meta)
 ```{r}
 gd <- googledrive::drive_download("https://docs.google.com/spreadsheets/d/1zPhp1daQAs4JN88t4VuLbhpc8ygKFOsA-IdVWQa8LRc/edit#gid=1126020500")
 meta <- readxl::read_excel(gd$local_path,sheet = "GWAS")
+meta <- data.table::fread(here::here("code/gwas_meta.tsv"))
 ```
 
 
@@ -152,7 +153,7 @@ subdirectory for its respective log files.
 gwas_paths <- MungeSumstats::import_sumstats(
   ids = meta$id, 
   save_dir = here::here("data/GWAS_munged"), 
-  nThread = 30, # >30 causes issues with read_vcf_parallel
+  nThread = 8, # >30 causes issues with read_vcf_parallel
   parallel_across_ids = FALSE,
   dbSNP = 144,
   force_new_vcf = FALSE,

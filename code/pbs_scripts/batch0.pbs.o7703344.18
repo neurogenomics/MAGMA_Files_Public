@@ -1,0 +1,15 @@
+
+========== Processing dataset : ieu-a-1187 ==========
+
+Time difference of 0.5 secs
+Time difference of 0.9 secs
+
+============================================
+
+        Job resource usage summary 
+
+                 Memory (GB)    NCPUs
+ Requested  :        50             4
+ Used       :         5 (peak)   0.35 (ave)
+
+============================================
