@@ -24,8 +24,49 @@ if(!require("MungeSumstats")) remotes::install_github("neurogenomics/MungeSumsta
 if(!require("downloadR")) remotes::install_github("RajLabMSSM/downloadR")
 ```
 
+# Pardinas2018
 
-# Jansen2019.AD 
+- [Publication](https://doi.org/10.1038/s41588-018-0059-2)
+- [Data](https://walters.psycm.cf.ac.uk/)
+
+```{r}
+source(here::here("code","prepare_Pardinas2018.R"))
+Pardinas2018 <- prepare_Pardinas2018()
+```
+
+
+# Yengo2018
+
+- [Publication](https://doi.org/10.1093/hmg/ddy271)
+- [Data](https://portals.broadinstitute.org/collaboration/giant/index.php/GIANT_consortium_data_files)
+
+```{r}
+source(here::here("code","prepare_Yengo2018.R"))
+Yengo2018 <- prepare_Yengo2018()
+```
+
+# Wheeler2017
+
+- [Publication](https://doi.org/10.1371/journal.pmed.1002383)
+- [Data](http://magicinvestigators.org/downloads/)
+
+```{r}
+source(here::here("code","prepare_Wheeler2017.R"))
+Wheeler2017 <- prepare_Wheeler2017()
+```
+
+
+# Nelson2017
+
+- [Publication](https://doi.org/10.1038/ng.3913)
+- [Data](http://www.cardiogramplusc4d.org/data-downloads/)
+
+```{r}
+source(here::here("code","prepare_Nelson2017.R"))
+Nelson2017 <- prepare_Nelson2017()
+```
+
+# Jansen2019
 
 - [Publication](https://doi.org/10.1038/s41588-018-0311-9)
 - [Data](https://ctg.cncr.nl/software/summary_statistics)
@@ -35,7 +76,7 @@ source(here::here("code","prepare_Jansen2019.R"))
 Jansen2019 <- prepare_Jansen2019()
 ```
 
-# Wightman2021.AD
+# Wightman2021
 
 - [Publication](https://doi.org/10.1038/s41588-021-00921-z)
 - [Data](https://ctg.cncr.nl/software/summary_statistics)

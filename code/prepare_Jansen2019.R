@@ -2,9 +2,12 @@ prepare_Jansen2019 <- function(save_dir = here::here("data","GWAS_munged"),
                                id = "Jansen2019.AD",
                                nThread = 8){ 
   
+  #### Download ####
+  path <- downloadR::downloader("https://ctg.cncr.nl/documents/p1651/AD_sumstats_Jansenetal_2019sept.txt.gz",
+                                output_dir = here::here("data","GWAS_raw"))
   #### Munge ####
   gwas_paths <- MungeSumstats::format_sumstats(
-    path = "https://ctg.cncr.nl/documents/p1651/AD_sumstats_Jansenetal_2019sept.txt.gz", 
+    path = path, 
     save_path = file.path(save_dir,id,paste0(id,".tsv.gz")),
     dbSNP = 144,
     bi_allelic_filter = TRUE,

@@ -1,0 +1,37 @@
+Welcome to MAGMA v1.10 (linux)
+Using flags:
+	--bfile /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur synonym-dup=skip
+	--pval /tmp/RtmpkwuWeq/Yengo2018.Height.tsv ncol=N duplicate=drop
+	--gene-annot /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Yengo2018.Height/MAGMA_Files/Yengo2018.Height.tsv.bgz.35UP.10DOWN/Yengo2018.Height.tsv.bgz.35UP.10DOWN.genes.annot
+	--out /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Yengo2018.Height/MAGMA_Files/Yengo2018.Height.tsv.bgz.35UP.10DOWN/Yengo2018.Height.tsv.bgz.35UP.10DOWN
+
+Start time is 21:02:38, Tuesday 06 Jun 2023
+
+Loading PLINK-format data...
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.fam... 503 individuals read
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bim... 22665064 SNPs read
+Preparing file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bed... 
+
+Reading SNP synonyms from file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.synonyms (auto-detected)
+	read 6016767 mapped synonyms from file, mapping to 3921040 SNPs in the data
+	WARNING: detected 133 synonymous SNP pairs in the data
+	         skipped all synonym entries involved, synonymous SNPs are kept in analysis
+	         writing list of detected synonyms in data to supplementary log file
+Reading SNP p-values from file /tmp/RtmpkwuWeq/Yengo2018.Height.tsv... 
+	detected 10 variables in file
+	using variable: SNP (SNP id)
+	using variable: P (p-value)
+	using variable: N (sample size; discarding SNPs with N < 50)
+	read 2281844 lines from file, containing valid SNP p-values for 2275087 SNPs in data (99.7% of lines, 10.04% of SNPs in data)
+Loading gene annotation from file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Yengo2018.Height/MAGMA_Files/Yengo2018.Height.tsv.bgz.35UP.10DOWN/Yengo2018.Height.tsv.bgz.35UP.10DOWN.genes.annot... 
+	17853 gene definitions read from file
+	found 17850 genes containing valid SNPs in genotype data
+
+
+Starting gene analysis... 
+	using model: SNPwise-mean
+	writing gene analysis results to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Yengo2018.Height/MAGMA_Files/Yengo2018.Height.tsv.bgz.35UP.10DOWN/Yengo2018.Height.tsv.bgz.35UP.10DOWN.genes.out
+	writing intermediate output to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Yengo2018.Height/MAGMA_Files/Yengo2018.Height.tsv.bgz.35UP.10DOWN/Yengo2018.Height.tsv.bgz.35UP.10DOWN.genes.raw
+
+
+End time is 00:39:38, Wednesday 07 Jun 2023 (elapsed: 03:37:00)

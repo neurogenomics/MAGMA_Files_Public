@@ -1,0 +1,39 @@
+Welcome to MAGMA v1.10 (linux)
+Using flags:
+	--bfile /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur synonym-dup=skip
+	--pval /tmp/RtmpcIC9Qo/Pardinas2018.SCZ.tsv N=35802 duplicate=drop
+	--gene-annot /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Pardinas2018.SCZ/MAGMA_Files/Pardinas2018.SCZ.tsv.bgz.35UP.10DOWN/Pardinas2018.SCZ.tsv.bgz.35UP.10DOWN.genes.annot
+	--out /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Pardinas2018.SCZ/MAGMA_Files/Pardinas2018.SCZ.tsv.bgz.35UP.10DOWN/Pardinas2018.SCZ.tsv.bgz.35UP.10DOWN
+
+Start time is 16:07:34, Wednesday 07 Jun 2023
+
+Loading PLINK-format data...
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.fam... 503 individuals read
+Reading file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bim... 22665064 SNPs read
+Preparing file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bed... 
+
+Reading SNP synonyms from file /home/rstudio/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.synonyms (auto-detected)
+	read 6016767 mapped synonyms from file, mapping to 3921040 SNPs in the data
+	WARNING: detected 133 synonymous SNP pairs in the data
+	         skipped all synonym entries involved, synonymous SNPs are kept in analysis
+	         writing list of detected synonyms in data to supplementary log file
+Reading SNP p-values from file /tmp/RtmpcIC9Qo/Pardinas2018.SCZ.tsv... 
+	detected 10 variables in file
+	using variable: SNP (SNP id)
+	using variable: P (p-value)
+	read 7301331 lines from file, containing valid SNP p-values for 7295051 SNPs in data (99.91% of lines, 32.19% of SNPs in data)
+	WARNING: file contained 2 SNPs (same IDs or synonyms) with duplications
+	         dropped all occurrences of each from analysis
+	         writing list of duplicated IDs to supplementary log file
+Loading gene annotation from file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Pardinas2018.SCZ/MAGMA_Files/Pardinas2018.SCZ.tsv.bgz.35UP.10DOWN/Pardinas2018.SCZ.tsv.bgz.35UP.10DOWN.genes.annot... 
+	17796 gene definitions read from file
+	found 17796 genes containing valid SNPs in genotype data
+
+
+Starting gene analysis... 
+	using model: SNPwise-mean
+	writing gene analysis results to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Pardinas2018.SCZ/MAGMA_Files/Pardinas2018.SCZ.tsv.bgz.35UP.10DOWN/Pardinas2018.SCZ.tsv.bgz.35UP.10DOWN.genes.out
+	writing intermediate output to file /shared/bms20/projects/MAGMA_Files_Public/data/GWAS_munged/Pardinas2018.SCZ/MAGMA_Files/Pardinas2018.SCZ.tsv.bgz.35UP.10DOWN/Pardinas2018.SCZ.tsv.bgz.35UP.10DOWN.genes.raw
+
+
+End time is 16:21:43, Wednesday 07 Jun 2023 (elapsed: 00:14:09)
