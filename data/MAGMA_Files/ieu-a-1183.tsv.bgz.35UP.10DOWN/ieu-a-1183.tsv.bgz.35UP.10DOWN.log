@@ -1,0 +1,37 @@
+Welcome to MAGMA v1.10 (linux)
+Using flags:
+	--bfile /rds/general/user/bms20/home/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur synonym-dup=skip
+	--pval /var/tmp/pbs.7704097[1].pbs/RtmpZVIOGj/ieu-a-1183.tsv ncol=N duplicate=drop
+	--gene-annot /rds/general/project/neurogenomics-lab/ephemeral/MAGMA_Files_Public/data/GWAS_munged/ieu-a-1183/MAGMA_Files/ieu-a-1183.tsv.bgz.35UP.10DOWN/ieu-a-1183.tsv.bgz.35UP.10DOWN.genes.annot
+	--out /rds/general/project/neurogenomics-lab/ephemeral/MAGMA_Files_Public/data/GWAS_munged/ieu-a-1183/MAGMA_Files/ieu-a-1183.tsv.bgz.35UP.10DOWN/ieu-a-1183.tsv.bgz.35UP.10DOWN
+
+Start time is 17:27:51, Tuesday 06 Jun 2023
+
+Loading PLINK-format data...
+Reading file /rds/general/user/bms20/home/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.fam... 503 individuals read
+Reading file /rds/general/user/bms20/home/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bim... 22665064 SNPs read
+Preparing file /rds/general/user/bms20/home/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.bed... 
+
+Reading SNP synonyms from file /rds/general/user/bms20/home/.cache/R/MAGMA.Celltyping/g1000_eur/g1000_eur.synonyms (auto-detected)
+	read 6016767 mapped synonyms from file, mapping to 3921040 SNPs in the data
+	WARNING: detected 133 synonymous SNP pairs in the data
+	         skipped all synonym entries involved, synonymous SNPs are kept in analysis
+	         writing list of detected synonyms in data to supplementary log file
+Reading SNP p-values from file /var/tmp/pbs.7704097[1].pbs/RtmpZVIOGj/ieu-a-1183.tsv... 
+	detected 13 variables in file
+	using variable: SNP (SNP id)
+	using variable: P (p-value)
+	using variable: N (sample size; discarding SNPs with N < 50)
+	read 6789989 lines from file, containing valid SNP p-values for 6787447 SNPs in data (99.96% of lines, 29.95% of SNPs in data)
+Loading gene annotation from file /rds/general/project/neurogenomics-lab/ephemeral/MAGMA_Files_Public/data/GWAS_munged/ieu-a-1183/MAGMA_Files/ieu-a-1183.tsv.bgz.35UP.10DOWN/ieu-a-1183.tsv.bgz.35UP.10DOWN.genes.annot... 
+	18035 gene definitions read from file
+	found 18034 genes containing valid SNPs in genotype data
+
+
+Starting gene analysis... 
+	using model: SNPwise-mean
+	writing gene analysis results to file /rds/general/project/neurogenomics-lab/ephemeral/MAGMA_Files_Public/data/GWAS_munged/ieu-a-1183/MAGMA_Files/ieu-a-1183.tsv.bgz.35UP.10DOWN/ieu-a-1183.tsv.bgz.35UP.10DOWN.genes.out
+	writing intermediate output to file /rds/general/project/neurogenomics-lab/ephemeral/MAGMA_Files_Public/data/GWAS_munged/ieu-a-1183/MAGMA_Files/ieu-a-1183.tsv.bgz.35UP.10DOWN/ieu-a-1183.tsv.bgz.35UP.10DOWN.genes.raw
+
+
+End time is 17:39:07, Tuesday 06 Jun 2023 (elapsed: 00:11:16)

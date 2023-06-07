@@ -313,6 +313,14 @@ patchwork::wrap_plots(plts,
                       ncol = 1) 
 ```
  
+ 
+# rsync
+
+Copy over files processed on HPC to another machine.
+
+```
+rsync -a /home/bms20/RDS/project/neurogenomics-lab/ephemeral/MAGMA_Files_Public/data/GWAS_munged/ ./data/GWAS_munged/
+```
 
 # Session Info
 
