@@ -34,7 +34,6 @@ source(here::here("code","prepare_Pardinas2018.R"))
 Pardinas2018 <- prepare_Pardinas2018()
 ```
 
-
 # Yengo2018
 
 - [Publication](https://doi.org/10.1093/hmg/ddy271)
@@ -54,7 +53,6 @@ Yengo2018 <- prepare_Yengo2018()
 source(here::here("code","prepare_Wheeler2017.R"))
 Wheeler2017 <- prepare_Wheeler2017()
 ```
-
 
 # Nelson2017
 
