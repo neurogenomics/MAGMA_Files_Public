@@ -24,6 +24,16 @@ if(!require("MungeSumstats")) remotes::install_github("neurogenomics/MungeSumsta
 if(!require("downloadR")) remotes::install_github("RajLabMSSM/downloadR")
 ```
 
+# Nalls2019_23andMe
+
+- [Publication](https://doi.org/10.1016/s1474-4422(19)30320-5)
+- Data (not public)
+
+```{r}
+source(here::here("code","prepare_Nalls2019_23andMe.R"))
+Nalls2019_23andMe <- prepare_Nalls2019_23andMe()
+```
+
 # Pardinas2018
 
 - [Publication](https://doi.org/10.1038/s41588-018-0059-2)
