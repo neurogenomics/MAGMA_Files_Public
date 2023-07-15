@@ -38,7 +38,7 @@ message_parallel <- MAGMA.Celltyping:::message_parallel
 #' meta <- gather_metadata(save_dir = save_dir)
 #' }
 gather_metadata <- function(save_dir, 
-                            pattern = "*.tsv.gz$",
+                            pattern = "*.tsv.gz$|*.tsv.bgz$",
                             use_logs = TRUE,
                             infer_builds = FALSE,
                             default_pop="EUR",
@@ -290,7 +290,7 @@ filter_traits <- function(meta,
 #' @keywords internal
 list_snps_to_genes_files <- function(save_dir,
                                      pattern = "*.genes.out$",
-                                     sep="\\.tsv\\.gz\\.",
+                                     sep="\\.tsv\\.gz\\.|\\.tsv\\.bgz\\.",
                                      verbose = TRUE){
   gene_files <- list.files(path = save_dir, 
                             pattern = pattern,
